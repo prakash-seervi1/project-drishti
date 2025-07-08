@@ -1,0 +1,70 @@
+sources:
+  firestore-drishti:
+    kind: firestore
+    project: project-drishti-mvp-31f1b
+
+tools:
+  get-incident-by-id:
+    kind: firestore-get
+    source: firestore-drishti
+    collection: incidents
+    description: Get an incident by its ID.
+    parameters:
+      - name: id
+        type: string
+        description: The incident ID.
+
+  list-active-incidents:
+    kind: firestore-query
+    source: firestore-drishti
+    collection: incidents
+    description: List all active incidents.
+    filters:
+      - field: status
+        op: ==
+        value: active
+
+  get-zone-by-id:
+    kind: firestore-get
+    source: firestore-drishti
+    collection: zones
+    description: Get a zone by its ID.
+    parameters:
+      - name: id
+        type: string
+        description: The zone ID.
+
+  list-zones:
+    kind: firestore-list
+    source: firestore-drishti
+    collection: zones
+    description: List all zones.
+
+  get-responder-by-id:
+    kind: firestore-get
+    source: firestore-drishti
+    collection: responders
+    description: Get a responder by its ID.
+    parameters:
+      - name: id
+        type: string
+        description: The responder ID.
+
+  list-available-responders:
+    kind: firestore-query
+    source: firestore-drishti
+    collection: responders
+    description: List all available responders.
+    filters:
+      - field: status
+        op: ==
+        value: available
+
+toolsets:
+  drishti_toolset:
+    - get-incident-by-id
+    - list-active-incidents
+    - get-zone-by-id
+    - list-zones
+    - get-responder-by-id
+    - list-available-responders 

@@ -1,0 +1,307 @@
+import { useState } from "react"
+import { Upload, Loader2, CheckCircle, XCircle, ArrowLeft, Camera, Video, FileText, Cloud } from "lucide-react"
+import { Link } from "react-router-dom"
+
+export default function MediaUpload() {
+  const [zone, setZone] = useState("")
+  const [notes, setNotes] = useState("")
+  const [file, setFile] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState(null)
+  const [dragActive, setDragActive] = useState(false)
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        setFile(file);
+    }
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
+  
+  const handleUpload = async () => {
+    const formData = {
+      filename: file.name,
+      mimetype: file.type,
+      zone: zone,
+      notes: "High crowd density observed",
+    };
+  
+    // Get signed URL
+    const res = await fetch("https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/getSignedUploadUrl", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+  
+    const responce = await res.json();
+  
+    // Upload the file directly
+    await fetch(responce.url, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+  
+    alert("Upload successful ✅");
+  };
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!zone || !file) {
+      setMessage({ type: "error", text: "Zone and media file are required." })
+      return
+    }
+
+    const formData = new FormData()
+    
+    formData.append("image", file); // 🖼️ File from input
+        
+    formData.append("zone", zone)
+    formData.append("notes", notes)
+    // formData.append("media", file)
+
+    setLoading(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch(
+        "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/uploadMedia",
+        { method: "POST", body: formData }
+      )
+      const data = await res.json()
+      setMessage({ type: "success", text: data.message || "Uploaded successfully!" })
+      setZone("")
+      setNotes("")
+      setFile(null)
+    } catch (err) {
+      console.error(err)
+      setMessage({ type: "error", text: "Upload failed. Please try again." })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getFileIcon = () => {
+    if (!file) return <Upload className="w-8 h-8 text-gray-400" />
+    if (file.type.startsWith('image/')) return <Camera className="w-8 h-8 text-blue-500" />
+    if (file.type.startsWith('video/')) return <Video className="w-8 h-8 text-purple-500" />
+    return <FileText className="w-8 h-8 text-gray-500" />
+  }
+
+  const getFileType = () => {
+    if (!file) return "No file selected"
+    if (file.type.startsWith('image/')) return "Image"
+    if (file.type.startsWith('video/')) return "Video"
+    return "File"
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Navigation */}
+        <Link to="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Link>
+
+        {/* Header */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <Upload className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Media Upload</h1>
+              <p className="text-gray-600">Upload photos and videos for crowd detection analysis</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Upload Form */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+          {/* <form onSubmit={handleSubmit} className="space-y-6"> */}
+            {/* Zone Selection */}
+            <div>
+              <label className="block font-semibold text-gray-900 mb-2">Zone *</label>
+              <select
+                value={zone}
+                onChange={(e) => setZone(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                required
+              >
+                <option value="">Select a zone</option>
+                <option value="Zone A - Main Entrance">Zone A - Main Entrance</option>
+                <option value="Zone B - Main Stage">Zone B - Main Stage</option>
+                <option value="Zone C - Food Court">Zone C - Food Court</option>
+                <option value="Zone D - Parking">Zone D - Parking</option>
+                <option value="Zone E - VIP Area">Zone E - VIP Area</option>
+                <option value="Zone F - Emergency Exit">Zone F - Emergency Exit</option>
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block font-semibold text-gray-900 mb-2">Notes (Optional)</label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Describe the situation, crowd behavior, or any relevant details..."
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm resize-none"
+              />
+            </div>
+
+            {/* File Upload Area */}
+            <div>
+              <label className="block font-semibold text-gray-900 mb-2">Upload Media *</label>
+              <div
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                  dragActive 
+                    ? "border-blue-500 bg-blue-50" 
+                    : file 
+                      ? "border-green-500 bg-green-50" 
+                      : "border-gray-300 bg-gray-50 hover:border-gray-400"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  required
+                />
+                
+                <div className="space-y-4">
+                  {getFileIcon()}
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {file ? file.name : "Drop your file here"}
+                    </h3>
+                    <p className="text-gray-600">
+                      {file 
+                        ? `${getFileType()} • ${(file.size / 1024 / 1024).toFixed(2)} MB`
+                        : "or click to browse"
+                      }
+                    </p>
+                  </div>
+
+                  {file && (
+                    <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>File selected successfully</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2">
+                Supported formats: JPG, PNG, GIF, MP4, MOV, AVI (Max 50MB)
+              </p>
+            </div>
+
+            {/* Message Display */}
+            {message && (
+              <div
+                className={`flex items-center px-4 py-3 rounded-xl text-sm ${
+                  message.type === "success"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                }`}
+              >
+                {message.type === "success" ? (
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                ) : (
+                  <XCircle className="w-5 h-5 mr-2 text-red-600" />
+                )}
+                {message.text}
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <div className="flex items-center justify-between pt-4">
+              <div className="text-sm text-gray-600">
+                {file && (
+                  <span className="flex items-center">
+                    <Cloud className="w-4 h-4 mr-1" />
+                    Ready to upload
+                  </span>
+                )}
+              </div>
+              
+              <button
+                type="submit"
+                disabled={loading || !file || !zone}
+                onClick={handleUpload}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5" />
+                    <span>Upload Media</span>
+                  </>
+                )}
+              </button>
+            </div>
+          {/* </form> */}
+        </div>
+
+        {/* Info Section */}
+        <div className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 mt-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+            <FileText className="w-5 h-5 mr-2 text-blue-600" />
+            Upload Guidelines
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Best Practices:</h4>
+              <ul className="space-y-1">
+                <li>• Ensure good lighting for clear visibility</li>
+                <li>• Capture crowd density from elevated positions</li>
+                <li>• Include timestamps when possible</li>
+                <li>• Avoid blurry or low-quality media</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">What We Analyze:</h4>
+              <ul className="space-y-1">
+                <li>• Crowd density and flow patterns</li>
+                <li>• Potential safety hazards</li>
+                <li>• Emergency exit accessibility</li>
+                <li>• Overall crowd behavior</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
