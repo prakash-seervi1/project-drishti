@@ -2,11 +2,14 @@ import { useState } from "react"
 import { MessageCircle, Sparkles, AlertTriangle, Plus, X } from "lucide-react"
 import ReportModal from "./ReportModal"
 import AIAssistant from "./AIAssistant"
+import CameraCapture from "./CameraCapture"
+import { Camera } from "lucide-react"
 
 export default function FloatingActionBar() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false)
+  const [isCameraOpen, setIsCameraOpen] = useState(false)
 
   const handleReportClick = () => {
     setIsReportModalOpen(true)
@@ -15,6 +18,11 @@ export default function FloatingActionBar() {
 
   const handleAIClick = () => {
     setIsAIAssistantOpen(true)
+    setIsExpanded(false)
+  }
+
+  const handleCameraClick = () => {
+    setIsCameraOpen(true)
     setIsExpanded(false)
   }
 
@@ -41,12 +49,28 @@ export default function FloatingActionBar() {
           </button>
         </div>
 
+        {/* Camera Button */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            isExpanded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0 pointer-events-none'
+          }`}
+          style={{ transitionDelay: isExpanded ? '50ms' : '100ms' }}
+        >
+          <button
+            onClick={handleCameraClick}
+            className="w-14 h-14 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center group mb-3"
+            title="Capture Image"
+          >
+            <Camera className="w-6 h-6" />
+          </button>
+        </div>
+
         {/* Report Button */}
         <div 
           className={`transition-all duration-300 ease-in-out ${
             isExpanded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0 pointer-events-none'
           }`}
-          style={{ transitionDelay: isExpanded ? '50ms' : '100ms' }}
+          style={{ transitionDelay: isExpanded ? '100ms' : '50ms' }}
         >
           <button
             onClick={handleReportClick}
@@ -72,6 +96,7 @@ export default function FloatingActionBar() {
       {/* Modals */}
       <ReportModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} />
       <AIAssistant isOpen={isAIAssistantOpen} onClose={() => setIsAIAssistantOpen(false)} />
+      <CameraCapture isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} />
     </>
   )
 } 

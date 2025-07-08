@@ -13,11 +13,13 @@ import MediaUpload from "./pages/uploadFile";
 import DesignSystemPage from "./pages/DesignSystemPage";
 import WireframesPage from "./pages/WireframesPage";
 import VenueManager from "./pages/VenueManager";
+import MobileMenu from "./components/MobileMenu"
 
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50"> {/* Background for the whole app */}
+    <>
+      <div className="min-h-screen bg-gray-50"> {/* Background for the whole app */}
          <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -56,6 +58,7 @@ export default function App() {
           </div>
         </div>
       </nav>
+      <MobileMenu />
 
       {/* Centralized Floating Action Bar */}
       <FloatingActionBar />
@@ -77,5 +80,6 @@ export default function App() {
         </Routes>
       </div>
     </div>
+    </>
   );
 }
