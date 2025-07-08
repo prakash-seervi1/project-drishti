@@ -1,20 +1,29 @@
-# 1️⃣ Build Stage
-FROM node:18-alpine AS builder
-WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package.json package-lock.json ./
-RUN npm install
-
-# Copy the full source code and build
-COPY . .
-RUN npm run build
-
-# 2️⃣ Production Stage - NGINX Server
-FROM nginx:alpine
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-# Add your custom nginx config for SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-# Copy the built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
+# ---------- 1. Build Stage ----------
+    FROM node:18-alpine AS builder
+    WORKDIR /app
+    
+    # Install dependencies
+    COPY package*.json ./
+    RUN npm install
+    
+    # Copy the source code
+    COPY . .
+    
+    # Build the Vite project
+    RUN npm run build
+    
+    # ---------- 2. Production Stage ----------
+    FROM nginx:alpine
+    
+    # Set the PORT env variable to match Cloud Run
+    ENV PORT=8080
+    
+    # Remove default nginx config
+    RUN rm /etc/nginx/conf.d/default.conf
+    
+    # Copy custom nginx config
+    COPY nginx.conf /etc/nginx/conf.d/default.conf
+    
+    # Copy the built app from builder stage
+    COPY --from=builder /app/dist /usr/share/nginx/html
+    
