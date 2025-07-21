@@ -1,7 +1,7 @@
-import { Zap, Users, Video, Brain, Bell, Navigation } from 'lucide-react'
+import { Zap, Video, Bell, Navigation } from 'lucide-react'
 import ActionButton from './ActionButton'
 
-export default function ActionCenter() {
+export default function ActionCenter({ onDispatchTeam, onSendAlert, onAIAnalysis }) {
   return (
     <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6">
       <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -13,13 +13,13 @@ export default function ActionCenter() {
           icon={<Zap className="w-5 h-5" />}
           label="Dispatch Team"
           color="bg-blue-600 hover:bg-blue-700"
-          onClick={() => alert("Dispatch interface opened")}
+          onClick={onDispatchTeam}
         />
         <ActionButton
-          icon={<Users className="w-5 h-5" />}
-          label="Crowd Alert"
-          color="bg-green-600 hover:bg-green-700"
-          onClick={() => alert("Crowd alert sent")}
+          icon={<span role="img" aria-label="AI" className="w-5 h-5">🤖⚡</span>}
+          label="AI Command Center"
+          color="bg-indigo-600 hover:bg-indigo-700"
+          onClick={onAIAnalysis}
         />
         <ActionButton
           icon={<Video className="w-5 h-5" />}
@@ -28,16 +28,10 @@ export default function ActionCenter() {
           onClick={() => alert("Camera zoom activated")}
         />
         <ActionButton
-          icon={<Brain className="w-5 h-5" />}
-          label="AI Analysis"
-          color="bg-indigo-600 hover:bg-indigo-700"
-          onClick={() => alert("AI Assistant available via floating button")}
-        />
-        <ActionButton
           icon={<Bell className="w-5 h-5" />}
           label="Send Alert"
           color="bg-orange-600 hover:bg-orange-700"
-          onClick={() => alert("Alert broadcast sent")}
+          onClick={onSendAlert}
         />
         <ActionButton
           icon={<Navigation className="w-5 h-5" />}

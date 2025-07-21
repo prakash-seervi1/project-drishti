@@ -1,6 +1,7 @@
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Upload, Loader2, CheckCircle, XCircle, ArrowLeft, Camera, Video, FileText, Cloud } from "lucide-react"
 import { Link } from "react-router-dom"
+import { api } from '../services/adkApi';
 
 export default function MediaUpload() {
   const [zone, setZone] = useState("")
@@ -9,6 +10,27 @@ export default function MediaUpload() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
   const [dragActive, setDragActive] = useState(false)
+  const [zones, setZones] = useState([])
+  const [zonesLoading, setZonesLoading] = useState(false)
+  const [zonesError, setZonesError] = useState("")
+  const [analysisStatus, setAnalysisStatus] = useState("")
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      setZonesLoading(true)
+      setZonesError("")
+      try {
+        const res = await api.getZones()
+        const zoneList = Array.isArray(res) ? res : (res.zones || [])
+        setZones(zoneList)
+      } catch (err) {
+        setZonesError("Failed to load zones. Please try again.")
+      } finally {
+        setZonesLoading(false)
+      }
+    }
+    fetchZones()
+  }, [])
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -37,30 +59,56 @@ export default function MediaUpload() {
   };
   
   const handleUpload = async () => {
-    const formData = {
-      filename: file.name,
-      mimetype: file.type,
-      zone: zone,
-      notes: "High crowd density observed",
-    };
-  
-    // Get signed URL
-    const res = await fetch("https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/getSignedUploadUrl", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-  
-    const responce = await res.json();
-  
-    // Upload the file directly
-    await fetch(responce.url, {
-      method: "PUT",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-  
-    alert("Upload successful ✅");
+    if (!file || !zone) {
+      setMessage({ type: "error", text: "Zone and media file are required." })
+      return
+    }
+    setLoading(true)
+    setMessage(null)
+    setAnalysisStatus("")
+    try {
+      // Get signed URL
+      const data = await api.getSignedUploadUrl({
+        filename: file.name,
+        mimetype: file.type,
+        zone,
+        notes,
+        type: '', // Always send a string
+        bucket: 'project-drishti-central1-bucket-vision'
+      });
+      if (!data.url) throw new Error("No upload URL returned")
+      // Upload the file directly
+      await fetch(data.url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      setMessage({ type: "success", text: "Upload successful ✅" })
+      // Automatically call vision analysis after upload
+      const fileUrl = `https://storage.googleapis.com/project-drishti-central1-bucket-vision/${data.objectPath}`
+      setAnalysisStatus("Analyzing image...")
+      try {
+        const analysisRes = await api.analyzeMedia({
+          fileUrl,
+          zone,
+          docId: data.docId // Pass docId from upload response
+        })
+        if (analysisRes && analysisRes.success) {
+          setAnalysisStatus(`People detected: ${analysisRes.personCount}`);
+        } else {
+          setAnalysisStatus('Image uploaded, but analysis failed.');
+        }
+      } catch (err) {
+        setAnalysisStatus('Image uploaded, but analysis failed.')
+      }
+      setZone("")
+      setNotes("")
+      setFile(null)
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Upload failed. Please try again." })
+    } finally {
+      setLoading(false)
+    }
   };
   
 
@@ -71,22 +119,12 @@ export default function MediaUpload() {
       return
     }
 
-    const formData = new FormData()
-    
-    formData.append("image", file); // 🖼️ File from input
-        
-    formData.append("zone", zone)
-    formData.append("notes", notes)
-    // formData.append("media", file)
-
     setLoading(true)
     setMessage(null)
 
     try {
-      const res = await fetch(
-        "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/uploadMedia",
-        { method: "POST", body: formData }
-      )
+      const formData = new FormData()
+      const res = await api.uploadMedia(formData);
       const data = await res.json()
       setMessage({ type: "success", text: data.message || "Uploaded successfully!" })
       setZone("")
@@ -142,20 +180,25 @@ export default function MediaUpload() {
             {/* Zone Selection */}
             <div>
               <label className="block font-semibold text-gray-900 mb-2">Zone *</label>
-              <select
-                value={zone}
-                onChange={(e) => setZone(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                required
-              >
-                <option value="">Select a zone</option>
-                <option value="Zone A - Main Entrance">Zone A - Main Entrance</option>
-                <option value="Zone B - Main Stage">Zone B - Main Stage</option>
-                <option value="Zone C - Food Court">Zone C - Food Court</option>
-                <option value="Zone D - Parking">Zone D - Parking</option>
-                <option value="Zone E - VIP Area">Zone E - VIP Area</option>
-                <option value="Zone F - Emergency Exit">Zone F - Emergency Exit</option>
-              </select>
+              {zonesLoading ? (
+                <div className="p-2 text-blue-600">Loading zones...</div>
+              ) : zonesError ? (
+                <div className="p-2 text-red-600">{zonesError}</div>
+              ) : (
+                <select
+                  value={zone}
+                  onChange={(e) => setZone(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                  required
+                >
+                  <option value="">Select a zone</option>
+                  {zones.map((z) => (
+                    <option key={z.id || z.name} value={z.id || z.name}>
+                      {z.name || z.id}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Notes */}
@@ -238,6 +281,14 @@ export default function MediaUpload() {
                   <XCircle className="w-5 h-5 mr-2 text-red-600" />
                 )}
                 {message.text}
+              </div>
+            )}
+
+            {/* Analysis Status Display */}
+            {analysisStatus && (
+              <div className="flex items-center px-4 py-3 rounded-xl text-sm bg-blue-50 text-blue-800 border border-blue-200 mt-4">
+                <Loader2 className="w-5 h-5 mr-2 text-blue-600 animate-spin" />
+                {analysisStatus}
               </div>
             )}
 

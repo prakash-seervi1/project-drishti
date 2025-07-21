@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+requests
+google-cloud-firestore
+google-cloud-storage>=2.10.0
+google-cloud-aiplatform>=1.44.0
+python-dotenv 
+google-cloud-vision 

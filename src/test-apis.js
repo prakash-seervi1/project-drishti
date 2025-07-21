@@ -10,7 +10,7 @@ import {
   chatAPI, 
   uploadAPI, 
   geminiAPI 
-} from './services/api.js'
+} from './services/adkApi.js'
 
 // Test function to run all API tests
 async function testAllAPIs() {

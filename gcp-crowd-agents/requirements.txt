@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+google-cloud-firestore
+google-cloud-pubsub
+google-cloud-aiplatform
+google-cloud-iam
+google-cloud-vision
+google-generativeai
+python-dotenv
+redis 
+Pillow
+google-cloud-texttospeech>=2.15.0 
+google-cloud-storage>=2.10.0 

@@ -39,6 +39,9 @@ const enhancedChatAgent = require('./chat-agent.js');
 const analyzeWithGemini = require('./analyzeWithGemini');
 const getSignedUploadUrl = require('./getSignedUploadUrl');
 const venuesAPI = require('./venues-api.js');
+const analyzeWithVertexVision = require('./analyzeWithVertexVision.js');
+const exportCrowdHistoryToBigQuery = require('./exportCrowdHistoryToBigQuery.js');
+const predictCrowdForecast = require('./predictCrowdForecast.js');
 
 // MCP Agent integration
 // const { Agent, ToolRegistry, Context } = require('@google/model-context-protocol');
@@ -74,6 +77,9 @@ module.exports = {
 
   // Gemini-based crowd analysis
   analyzeWithGemini: analyzeWithGemini(db, geminiModel),
+
+  // Vertex AI Vision analysis
+  analyzeWithVertexVision: analyzeWithVertexVision.analyzeWithVertexVision,
 
   // File Upload
   getSignedUploadUrl: getSignedUploadUrl,
@@ -126,6 +132,12 @@ module.exports = {
 
   // Venue API
   createVenue: venuesAPI.createVenue({ db, admin, geminiModel }),
+
+  // Export crowd history to BigQuery
+  exportCrowdHistoryToBigQuery: exportCrowdHistoryToBigQuery,
+
+  // Predict crowd forecast using Vertex AI
+  predictCrowdForecast: predictCrowdForecast,
 
   // System Status and Analytics
   getSystemStatus: functions.https.onRequest(async (req, res) => {

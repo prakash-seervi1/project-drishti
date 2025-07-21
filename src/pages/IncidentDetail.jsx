@@ -13,7 +13,7 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react"
-import { incidentsAPI, respondersAPI } from "../services/api"
+import { api } from "../services/adkApi";
 import {
   IncidentNavigation,
   QuickStats,
@@ -63,42 +63,41 @@ export default function IncidentDetail() {
     setError(null)
     try {
       // Fetch incident details
-      const incidentResponse = await incidentsAPI.getIncidentById(id)
-      if (incidentResponse.success) {
-        const { incident, zone, assignedResponder, assignmentTransaction } = incidentResponse.data;
-        setIncident(incident);
+      const incidentResponse = await api.getIncidentById(id)
+      // Accept both {success, data} and direct data
+      let incidentData = incidentResponse && incidentResponse.data ? incidentResponse.data : incidentResponse;
+      if (incidentData && (incidentData.incident || incidentData.id)) {
+        const { incident, zone, assignedResponder, assignmentTransaction } = incidentData;
+        setIncident(incident || incidentData);
         setZone(zone);
         setAssignedResponder(assignedResponder);
         setAssignment(assignmentTransaction);
-     
 
-      // Fetch incident notes
-      const notesResponse = await incidentsAPI.getIncidentNotes(id)
-      if (notesResponse.success) {
-        setNotes(notesResponse.data || [])
-      }
+        // Fetch incident notes
+        // const notesResponse = await api.getIncidentNotes(id)
+        // const notesData = notesResponse && notesResponse.data ? notesResponse.data : notesResponse;
+        // setNotes(notesData || [])
 
-      // Fetch responders
-      const respondersResponse = await respondersAPI.getResponders()
-      if (respondersResponse.success) {
-        setResponders(respondersResponse.data || [])
-      }
+        // Fetch responders
+        let respondersResponse = await api.getResponders();
+        let responders = Array.isArray(respondersResponse) ? respondersResponse : (respondersResponse.responders || respondersResponse.data || []);
+        setResponders(responders);
 
-      // Fetch related incidents (same zone, different status)
-      const relatedResponse = await incidentsAPI.getIncidents({
-        zone: zone?.id,
-        status: '!resolved',
-        limit: 3
-      })
-      if (relatedResponse.success) {
-        const relatedData = (relatedResponse.data?.incidents || [])
-          .filter(inc => inc.id !== id)
-          .slice(0, 3)
-        setRelatedIncidents(relatedData)
+        // Fetch related incidents (same zone, different status)
+        const relatedResponse = await api.getIncidents({
+          zone: (zone && zone.id) || (incident && incident.zoneId) || (incidentData && incidentData.zoneId),
+          status: '!resolved',
+          limit: 3
+        })
+        const relatedData = relatedResponse && relatedResponse.data && relatedResponse.data.incidents
+          ? relatedResponse.data.incidents
+          : (relatedResponse.incidents || []);
+        setRelatedIncidents(
+          relatedData.filter(inc => inc.id !== id).slice(0, 3)
+        )
+      } else {
+        throw new Error(incidentResponse.error || 'Incident not found')
       }
-    } else {
-      throw new Error(incidentResponse.error || 'Incident not found')
-    }
     } catch (err) {
       console.error("Error fetching incident data:", err)
       setError(err.message)
@@ -118,7 +117,7 @@ export default function IncidentDetail() {
 
     setUpdating(true)
     try {
-      const response = await incidentsAPI.updateIncident(id, {
+      const response = await api.updateIncident(id, {
         status: newStatus,
         lastUpdated: new Date(),
       })
@@ -140,7 +139,7 @@ export default function IncidentDetail() {
     if (!newNote.trim() || !incident) return
 
     try {
-      const response = await incidentsAPI.addIncidentNote(id, newNote.trim())
+      const response = await api.addIncidentNote(id, newNote.trim())
       
       if (response.success) {
         const newNoteData = {
@@ -166,7 +165,7 @@ export default function IncidentDetail() {
     if (!incident) return
 
     try {
-      const response = await respondersAPI.assignResponderToIncident(responderId, id)
+      const response = await api.assignResponderToIncident(responderId, id)
       
       if (response.success) {
         const responder = responders.find((r) => r.id === responderId)

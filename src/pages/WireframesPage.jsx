@@ -189,6 +189,16 @@ KEY TALKING POINTS:
             >
               Process Flows
             </button>
+            <button
+              onClick={() => setActiveTab("enhanced-dashboard")}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "enhanced-dashboard"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Enhanced Dashboard
+            </button>
           </nav>
         </div>
       </div>
@@ -324,6 +334,70 @@ KEY TALKING POINTS:
         {activeTab === "architecture" && <SystemArchitecture />}
         {activeTab === "interfaces" && <UserInterfaceWireframes />}
         {activeTab === "processes" && <ProcessFlowDiagrams />}
+        {activeTab === "enhanced-dashboard" && (
+          <div>
+            <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
+              <span className="mr-2">🧠</span> Enhanced Dashboard Overview
+            </h2>
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <pre className="overflow-x-auto text-xs md:text-sm" style={{ fontFamily: 'monospace' }}>{`
+---------------------------------------------------------------+
+| [Logo]  Event Safety Dashboard         [User/Settings Icon]   |
++---------------------------------------------------------------+
+| Zone: [Dropdown ▼]  |  Capacity: 500  |  Current: 320 (High)  |
++---------------------------------------------------------------+
+| [Critical Alerts]   | [Incident Analytics] | [Responder Teams]|
++---------------------+---------------------+-------------------+
+| [Crowd Forecast Analytics]                                   |
+|  ---------------------------------------------------------   |
+| |  [Line Chart: History + Forecast]                      |   |
+| |  [Alert: "Forecasted crowd exceeds safe limit!"]       |   |
+|  ---------------------------------------------------------   |
++---------------------------------------------------------------+
+| [Live Command Feed] | [Zone Status] | [Action Center]         |
++---------------------+---------------+-------------------------+
+| [Emergency Contacts]                                         |
++---------------------------------------------------------------+
+| [Camera Upload & AI Analysis]                                |
+|  - Floating Action Bar, Camera Modal, AI Results, Incident   |
++---------------------------------------------------------------+
+| [Incident Management]                                        |
+|  - Incident List, Details, Map View                          |
++---------------------------------------------------------------+
+| [Predictive Analytics]                                       |
+|  - Forecast Table/Chart, Proactive Alerts                    |
++---------------------------------------------------------------+
+| [AI Assistant] (Floating Button, Chat, Contextual Help)      |
++---------------------------------------------------------------+
+`}</pre>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold mb-2 text-gray-800">Key Features</h3>
+                <ul className="list-disc pl-6 space-y-1 text-gray-700">
+                  <li><b>Crowd Forecast Analytics:</b> <span className="text-gray-600">Live and forecasted crowd data per zone, with alerting if capacity is exceeded. (Component: <code>CrowdForecastChart</code>)</span></li>
+                  <li><b>Camera Upload & AI Analysis:</b> <span className="text-gray-600">Capture images or live stream, upload to backend, and trigger AI analysis for incidents. (Components: <code>CameraCapture</code>, <code>FloatingActionBar</code>)</span></li>
+                  <li><b>AI Assistant:</b> <span className="text-gray-600">Conversational assistant for analytics, incident queries, and operator help. (Component: <code>AIAssistant</code>)</span></li>
+                  <li><b>Incident Management:</b> <span className="text-gray-600">Incident list, details, timeline, map, and responder assignment. (See <code>IncidentDetail</code> and <code>incidents/</code> components)</span></li>
+                  <li><b>Live Command Feed:</b> <span className="text-gray-600">Live video and command interface for each zone. (Component: <code>LiveCommandFeed</code>)</span></li>
+                  <li><b>Zone Status:</b> <span className="text-gray-600">Overview and quick status for all zones. (Component: <code>ZoneStatus</code>)</span></li>
+                  <li><b>Action Center:</b> <span className="text-gray-600">Quick actions for dispatch, alerts, and routing. (Component: <code>ActionCenter</code>)</span></li>
+                  <li><b>Emergency Contacts:</b> <span className="text-gray-600">Quick-call and status for emergency services. (Component: <code>EmergencyContacts</code>)</span></li>
+                  <li><b>Critical Alerts & Analytics:</b> <span className="text-gray-600">Real-time alerts and incident analytics. (Components: <code>CriticalAlerts</code>, <code>IncidentAnalytics</code>)</span></li>
+                  <li><b>AI Situation Summary:</b> <span className="text-gray-600">AI-powered summary and recommendations. (Component: <code>AISituationSummary</code>)</span></li>
+                </ul>
+              </div>
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-2 text-gray-800">How It Works</h3>
+                <ol className="list-decimal pl-6 space-y-1 text-gray-700">
+                  <li>Operators monitor the dashboard for real-time crowd, incident, and alert data.</li>
+                  <li>AI Assistant is available at all times for queries, analytics, and help.</li>
+                  <li>Camera uploads and live streams are analyzed by AI for incident detection and crowd analytics.</li>
+                  <li>Forecasting and analytics widgets provide proactive warnings and recommendations.</li>
+                  <li>All features are modular and extensible, matching the actual implementation.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Key Features Footer */}

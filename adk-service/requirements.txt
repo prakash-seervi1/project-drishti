@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+google-cloud-firestore
+google-auth
+python-dotenv
+httpx
+# Placeholder for Google ADK (add actual package if available)
+google-cloud-aiplatform 

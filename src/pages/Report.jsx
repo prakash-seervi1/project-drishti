@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { incidentsAPI } from "../services/api"
+import { api } from "../services/adkApi";
 import { ArrowLeft, Brain, FileText, Send, CheckCircle, XCircle } from "lucide-react"
 import { Link } from "react-router-dom"
 
@@ -45,7 +45,7 @@ export default function Report() {
         }
       }
 
-      const response = await incidentsAPI.createIncident(incidentData)
+      const response = await api.createIncident(incidentData)
       
       if (response.success) {
         setMessage("Incident reported successfully! Response team has been notified.")

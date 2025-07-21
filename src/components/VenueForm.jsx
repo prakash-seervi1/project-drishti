@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { uploadFileToGCS } from '../utils/upload';
+import { api } from '../services/adkApi';
 
 const initialState = {
   eventName: '',
@@ -41,6 +42,25 @@ export default function VenueForm({ onSubmit }) {
     return newErrors;
   };
 
+  // Upload image to GCS using presigned URL (using api service)
+  const uploadImage = async () => {
+    if (!form.layoutImage) return '';
+    const presigned = await api.getSignedUploadUrl({
+      filename: form.layoutImage.name,
+      mimetype: form.layoutImage.type,
+      zone: 'venue',
+      type: 'venue',
+      notes: '',
+      bucket: 'project-drishti-central1-bucket-venues',
+    });
+    await fetch(presigned.url, {
+      method: 'PUT',
+      headers: { 'Content-Type': form.layoutImage.type },
+      body: form.layoutImage,
+    });
+    return `https://storage.googleapis.com/project-drishti-central1-bucket-venues/${presigned.objectPath}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -51,12 +71,7 @@ export default function VenueForm({ onSubmit }) {
     try {
       let imageUrl = null;
       if (form.layoutImage) {
-        imageUrl = await uploadFileToGCS({
-          file: form.layoutImage,
-          zone: 'venue',
-          type: 'venue',
-          apiBaseUrl: API_BASE,
-        });
+        imageUrl = await uploadImage();
       }
       // Prepare venue data
       const venueData = {
@@ -69,17 +84,8 @@ export default function VenueForm({ onSubmit }) {
         imageUrl,
         zones: [], // For manual mode, can add later
       };
-      // Call backend API
-      const res = await fetch(`${API_BASE}/createVenue`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(venueData),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to create venue');
-      }
-      const result = await res.json();
+      // Call backend API using api service
+      const result = await api.createVenue(venueData);
       if (onSubmit) onSubmit(result);
       else {
         alert('Venue created!');

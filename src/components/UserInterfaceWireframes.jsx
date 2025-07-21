@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import html2canvas from "html2canvas"
 import { DeviceFrame, WireframeBox, GoogleAIBadge, Annotation } from "./WireframeComponents"
 import {
   Search,
@@ -18,6 +19,8 @@ import {
   Shield,
   Phone,
   Navigation,
+  Video,
+  Users,
 } from "lucide-react"
 
 export default function UserInterfaceWireframes() {
@@ -25,116 +28,265 @@ export default function UserInterfaceWireframes() {
 
   const DesktopDashboard = () => (
     <DeviceFrame type="desktop">
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="bg-gray-900 text-white p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Shield className="w-8 h-8 text-blue-400" />
-            <h1 className="text-xl font-bold">Project Drishti Command Center</h1>
-            <GoogleAIBadge service="Vertex AI" />
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                className="bg-gray-800 text-white pl-10 pr-4 py-2 rounded-lg w-64"
-                placeholder="Ask Gemini: 'Show me crowd density at Gate 5'"
-              />
-            </div>
-            <Bell className="w-6 h-6 text-yellow-400" />
-            <User className="w-6 h-6" />
-          </div>
+      {/* Download Screenshot Button and Dashboard Container */}
+      <div id="dashboard-capture-area" className="relative">
+        <div className="flex justify-end mb-2">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 font-semibold text-sm"
+            onClick={async () => {
+              const dashboard = document.getElementById("dashboard-capture-area");
+              if (!dashboard) return;
+              // Hide overlays (e.g., AI Assistant modal overlay) before screenshot
+              const overlays = document.querySelectorAll('.fixed.inset-0.z-40');
+              overlays.forEach(el => el.style.display = 'none');
+              const canvas = await html2canvas(dashboard, { useCORS: true, logging: false });
+              overlays.forEach(el => el.style.display = '');
+              const link = document.createElement("a");
+              link.download = "drishti-dashboard-screenshot.png";
+              link.href = canvas.toDataURL("image/png");
+              link.click();
+            }}
+          >
+            Download Screenshot
+          </button>
         </div>
-
-        <div className="flex-1 flex">
-          {/* Sidebar */}
-          <div className="w-64 bg-gray-100 p-4">
-            <nav className="space-y-2">
-              <div className="font-semibold text-gray-700 mb-4">AI Modules</div>
-              <div className="flex items-center space-x-2 p-2 bg-blue-100 rounded">
-                <Brain className="w-4 h-4 text-blue-600" />
-                <span className="text-sm">Predictive Analytics</span>
+        <div className="h-full flex flex-col relative">
+          {/* Header */}
+          <div className="bg-gray-900 text-white p-4 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Shield className="w-8 h-8 text-blue-400" />
+              <h1 className="text-xl font-bold">Project Drishti Command Center</h1>
+              <GoogleAIBadge service="Vertex AI" />
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  className="bg-gray-800 text-white pl-10 pr-4 py-2 rounded-lg w-64"
+                  placeholder="Ask Gemini: 'Show me crowd density at Gate 5'"
+                />
               </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded">
-                <Eye className="w-4 h-4 text-green-600" />
-                <span className="text-sm">Vision Monitoring</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded">
-                <TrendingUp className="w-4 h-4 text-purple-600" />
-                <span className="text-sm">Crowd Analysis</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded">
-                <Zap className="w-4 h-4 text-orange-600" />
-                <span className="text-sm">Auto Dispatch</span>
-              </div>
-            </nav>
+              <Bell className="w-6 h-6 text-yellow-400" />
+              <User className="w-6 h-6" />
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 p-6">
-            <div className="grid grid-cols-3 gap-6 mb-6">
-              {/* AI Insights Panel */}
-              <div className="col-span-2">
-                <WireframeBox className="h-64 relative">
-                  <div className="absolute top-4 left-4">
-                    <GoogleAIBadge service="Gemini" />
-                  </div>
-                  <div className="text-center">
-                    <Brain className="w-12 h-12 mx-auto mb-4 text-purple-600" />
-                    <h3 className="font-semibold mb-2">AI Situational Summary</h3>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>"Predicted bottleneck at Gate 5 in 18 minutes"</p>
-                      <p>"Crowd density: 85% capacity at Main Plaza"</p>
-                      <p>"3 security officers dispatched automatically"</p>
-                    </div>
-                  </div>
-                  <Annotation text="Natural language AI insights" position="top" color="purple" />
-                </WireframeBox>
-              </div>
-
-              {/* Live Alerts */}
-              <div>
-                <WireframeBox className="h-64">
-                  <div className="w-full">
-                    <h3 className="font-semibold mb-4 flex items-center">
-                      <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
-                      Live Alerts
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2 p-2 bg-red-50 rounded">
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs">Fire detected - Sector 7</span>
-                      </div>
-                      <div className="flex items-center space-x-2 p-2 bg-yellow-50 rounded">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-xs">Crowd surge - Gate 3</span>
-                      </div>
-                      <div className="flex items-center space-x-2 p-2 bg-green-50 rounded">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-xs">All clear - Sector 1</span>
-                      </div>
-                    </div>
-                  </div>
-                </WireframeBox>
-              </div>
+          <div className="flex-1 flex relative">
+            {/* Sidebar */}
+            <div className="w-64 bg-gray-100 p-4">
+              <nav className="space-y-2">
+                <div className="font-semibold text-gray-700 mb-4">AI Modules</div>
+                <div className="flex items-center space-x-2 p-2 bg-blue-100 rounded">
+                  <Brain className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm">Predictive Analytics</span>
+                </div>
+                <div className="flex items-center space-x-2 p-2 bg-green-100 rounded">
+                  <Eye className="w-4 h-4 text-green-600" />
+                  <span className="text-sm">Vision Monitoring</span>
+                </div>
+                <div className="flex items-center space-x-2 p-2 bg-purple-100 rounded">
+                  <TrendingUp className="w-4 h-4 text-purple-600" />
+                  <span className="text-sm">Crowd Analysis</span>
+                </div>
+                <div className="flex items-center space-x-2 p-2 bg-orange-100 rounded">
+                  <Zap className="w-4 h-4 text-orange-600" />
+                  <span className="text-sm">Auto Dispatch</span>
+                </div>
+              </nav>
             </div>
 
-            {/* Interactive Map */}
-            <WireframeBox className="h-80 relative">
-              <div className="absolute top-4 left-4">
-                <GoogleAIBadge service="Google Maps" />
-              </div>
-              <div className="text-center">
-                <MapPin className="w-16 h-16 mx-auto mb-4 text-green-600" />
-                <h3 className="font-semibold mb-2">Real-time Venue Map</h3>
-                <div className="text-sm text-gray-600">
-                  Interactive map with AI-powered heat zones and predictive overlays
+            {/* Main Content */}
+            <div className="flex-1 p-6 relative">
+              {/* Zone Selector & Quick Stats */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-4">
+                  <span className="font-semibold text-gray-700">Zone:</span>
+                  <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                    <option>Main Plaza</option>
+                    <option>Gate 5</option>
+                    <option>Sector 7</option>
+                  </select>
+                  <span className="text-gray-500">Capacity: 500</span>
+                  <span className="text-gray-500">Current: 320 (High)</span>
+                </div>
+                <div className="flex space-x-2">
+                  <div className="bg-white rounded-lg px-4 py-2 shadow text-sm text-gray-700 flex items-center">
+                    <AlertTriangle className="w-4 h-4 text-red-500 mr-1" /> 5 Incidents
+                  </div>
+                  <div className="bg-white rounded-lg px-4 py-2 shadow text-sm text-gray-700 flex items-center">
+                    <Users className="w-4 h-4 text-indigo-500 mr-1" /> 85% Density
+                  </div>
+                  <div className="bg-white rounded-lg px-4 py-2 shadow text-sm text-gray-700 flex items-center">
+                    <User className="w-4 h-4 text-blue-500 mr-1" /> 12 Responders
+                  </div>
                 </div>
               </div>
-              <Annotation text="AI-enhanced mapping with predictive zones" position="top" color="green" />
-            </WireframeBox>
+
+              {/* Top Row: Alerts, Analytics, Teams */}
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <WireframeBox className="h-40 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
+                    <span className="font-semibold">Critical Alerts</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center"><span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>Fire detected - Sector 7</div>
+                    <div className="flex items-center"><span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>Crowd surge - Gate 3</div>
+                    <div className="flex items-center"><span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>All clear - Sector 1</div>
+                  </div>
+                </WireframeBox>
+                <WireframeBox className="h-40 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
+                    <span className="font-semibold">Incident Analytics</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Bar/line charts for incident types, trends, and stats</div>
+                </WireframeBox>
+                <WireframeBox className="h-40 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <Users className="w-5 h-5 text-blue-600 mr-2" />
+                    <span className="font-semibold">Responder Teams</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Status, availability, and quick dispatch</div>
+                </WireframeBox>
+              </div>
+
+              {/* Crowd Forecast Analytics */}
+              <WireframeBox className="h-40 mb-3 relative">
+                <div className="absolute top-4 left-4">
+                  <GoogleAIBadge service="Vertex AI" />
+                </div>
+                <div className="flex items-center mb-2">
+                  <TrendingUp className="w-5 h-5 text-orange-500 mr-2" />
+                  <span className="font-semibold">Crowd Forecast Analytics</span>
+                </div>
+                <div className="text-xs text-gray-600 mb-2">Line chart: history + forecast, with alert if capacity exceeded</div>
+                <div className="bg-orange-50 border-l-4 border-orange-400 p-2 rounded text-xs text-orange-700 mb-2">⚠️ Forecasted crowd exceeds safe limit at 18:30!</div>
+                <div className="h-24 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">[Line Chart Placeholder]</div>
+              </WireframeBox>
+
+              {/* Middle Row: Live Feed, Zone Status, Action Center */}
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <WireframeBox className="h-48 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <Video className="w-5 h-5 text-blue-500 mr-2" />
+                    <span className="font-semibold">Live Command Feed</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Live video, zone selection, controls</div>
+                </WireframeBox>
+                <WireframeBox className="h-48 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <Eye className="w-5 h-5 text-purple-500 mr-2" />
+                    <span className="font-semibold">Zone Status</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Overview of all zones, quick status, camera online/offline</div>
+                </WireframeBox>
+                <WireframeBox className="h-48 flex flex-col justify-between">
+                  <div className="flex items-center mb-2">
+                    <Zap className="w-5 h-5 text-yellow-500 mr-2" />
+                    <span className="font-semibold">Action Center</span>
+                  </div>
+                  <div className="text-xs text-gray-600">Quick actions: dispatch, alert, route, AI analysis</div>
+                </WireframeBox>
+              </div>
+     {/* Predictive Analytics */}
+     <WireframeBox className="h-24 mb-3 flex flex-col justify-between">
+                <div className="flex items-center mb-2">
+                  <Brain className="w-5 h-5 text-green-600 mr-2" />
+                  <span className="font-semibold">Predictive Analytics</span>
+                </div>
+                <div className="text-xs text-gray-600">Forecast table/chart, proactive alerts for predicted risks</div>
+              </WireframeBox>
+
+                 {/* Incident Management */}
+                 <WireframeBox className="h-32 mb-3 flex flex-col justify-between">
+                <div className="flex items-center mb-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="font-semibold">Incident Management</span>
+                </div>
+                <div className="text-xs text-gray-600">Incident list, details, timeline, map view, responder assignment</div>
+              </WireframeBox>
+
+              {/* Emergency Contacts */}
+              <WireframeBox className="h-24 mb-3 flex flex-col justify-between">
+                <div className="flex items-center mb-2">
+                  <Phone className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="font-semibold">Emergency Contacts</span>
+                </div>
+                <div className="text-xs text-gray-600">Quick-call, status, ETA for emergency services</div>
+              </WireframeBox>
+
+              {/* Camera Upload & AI Analysis */}
+              <WireframeBox className="h-24 mb-3 flex flex-col justify-between">
+                <div className="flex items-center mb-2">
+                  <Camera className="w-5 h-5 text-purple-600 mr-2" />
+                  <span className="font-semibold">Camera Upload & AI Analysis</span>
+                </div>
+                <div className="text-xs text-gray-600">Floating action bar, camera modal, AI results, incident creation</div>
+              </WireframeBox>
+
+           
+         
+
+              {/* AI Assistant Floating Button */}
+              <div className="fixed bottom-10 right-10 z-50 flex flex-col items-end">
+                <button className="w-14 h-14 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl">
+                  <Brain className="w-7 h-7" />
+                </button>
+                <span className="bg-white text-green-700 px-2 py-1 rounded shadow mt-2 text-xs">AI Assistant</span>
+              </div>
+            </div>
           </div>
         </div>
+        {/* Agentic AI Slide-Out Panel */}
+        {/* <div className="fixed top-24 right-0 h-[80vh] w-96 bg-white border-l-4 border-green-400 shadow-2xl z-50 flex flex-col p-6 animate-slide-in" style={{ minWidth: 320 }}>
+          <h2 className="text-xl font-bold text-green-700 mb-2 flex items-center">
+            <Brain className="w-6 h-6 mr-2 text-green-500" /> Agentic AI System
+          </h2>
+          <p className="text-gray-700 mb-4 text-sm">
+            <b>Agentic AI</b> powers the Drishti platform with perception, reasoning, and autonomous action. It continuously monitors, analyzes, and responds to real-world events using Google AI, Gemini, and Vertex AI.
+          </p>
+          <div className="mb-4">
+            <h3 className="font-semibold text-gray-800 mb-1 text-sm">How It Works:</h3>
+            <ul className="list-decimal pl-5 text-gray-700 text-sm space-y-1">
+              <li><b>Perception:</b> Ingests live video, sensor, and report data</li>
+              <li><b>Reasoning:</b> Uses Gemini & Vertex AI for analysis, forecasting, and recommendations</li>
+              <li><b>Action:</b> Dispatches responders, sends alerts, updates dashboard in real time</li>
+              <li><b>Feedback:</b> Learns from outcomes, operator input, and incident resolution</li>
+            </ul>
+          </div>
+          <div className="mb-4">
+            <h3 className="font-semibold text-gray-800 mb-1 text-sm">Agentic Workflow:</h3>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center space-x-2 mb-2">
+                <Eye className="w-5 h-5 text-blue-500" />
+                <span className="text-xs">Perception</span>
+                <span className="text-gray-400">→</span>
+                <Brain className="w-5 h-5 text-purple-500" />
+                <span className="text-xs">Reasoning</span>
+                <span className="text-gray-400">→</span>
+                <Zap className="w-5 h-5 text-orange-500" />
+                <span className="text-xs">Action</span>
+                <span className="text-gray-400">→</span>
+                <Shield className="w-5 h-5 text-green-600" />
+                <span className="text-xs">Feedback</span>
+              </div>
+              <div className="text-xs text-gray-500">(Continuous, autonomous event safety loop)</div>
+            </div>
+          </div>
+          <div className="mb-2">
+            <h3 className="font-semibold text-gray-800 mb-1 text-sm">Key Capabilities:</h3>
+            <ul className="list-disc pl-5 text-gray-700 text-xs space-y-1">
+              <li>Conversational AI Assistant for analytics & help</li>
+              <li>Real-time incident detection & auto-dispatch</li>
+              <li>Predictive crowd analytics & proactive alerts</li>
+              <li>Continuous learning from operator feedback</li>
+            </ul>
+          </div>
+          <div className="mt-auto pt-2">
+            <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Always On</span>
+          </div>
+        </div> */}
       </div>
     </DeviceFrame>
   )

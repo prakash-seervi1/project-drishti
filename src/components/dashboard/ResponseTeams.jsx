@@ -28,12 +28,14 @@ export default function ResponseTeams({ responderTeams, handleDispatchResponder 
               >
                 {team.status}
               </span>
-              <button
-                onClick={() => handleDispatchResponder(team.name)}
-                className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700"
-              >
-                Dispatch
-              </button>
+              {team.available > 0 && (
+                <button
+                  onClick={() => handleDispatchResponder(team.name)}
+                  className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700"
+                >
+                  Dispatch
+                </button>
+              )}
             </div>
           </div>
         ))}

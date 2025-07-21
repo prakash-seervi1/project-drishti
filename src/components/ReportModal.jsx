@@ -74,7 +74,8 @@ export default function ReportModal({ isOpen, onClose }) {
   
       // 2. Dispatch nearest responder (optional: hardcoded location for now)
       const dispatchRes = await fetch(
-        "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/dispatchResponder",
+        // TODO: Replace with new backend endpoint for dispatch responder
+        // "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/dispatchResponder",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

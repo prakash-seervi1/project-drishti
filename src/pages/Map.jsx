@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { GoogleMap, useLoadScript, PolylineF } from "@react-google-maps/api"
 import { Link } from "react-router-dom"
-import { incidentsAPI, zonesAPI, respondersAPI } from "../services/api"
+import { api } from "../services/adkApi";
 
 // Import map components
 import {
@@ -129,8 +129,6 @@ export default function MapPage() {
   const [incidents, setIncidents] = useState([])
   const [zones, setZones] = useState([])
   const [responders, setResponders] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [selectedMarker, setSelectedMarker] = useState(null)
   const [mapCenter, setMapCenter] = useState(center)
   const [zoom, setZoom] = useState(15)
@@ -152,21 +150,18 @@ export default function MapPage() {
   // Fetch all map data
   const fetchMapData = async () => {
     try {
-      setLoading(true)
-      setError(null)
-
       // Fetch incidents
-      const incidentsResponse = await incidentsAPI.getIncidents({
+      const incidentsResponse = await api.getIncidents({
         limit: 100,
         status: filters.status !== 'all' ? filters.status : undefined,
         type: filters.type !== 'all' ? filters.type : undefined,
       })
 
       // Fetch zones
-      const zonesResponse = await zonesAPI.getZones()
+      const zonesResponse = await api.getZones()
 
       // Fetch responders
-      const respondersResponse = await respondersAPI.getResponders()
+      const respondersResponse = await api.getResponders()
 
       if (incidentsResponse.success) {
         const incidentsData = incidentsResponse.data?.incidents || []
@@ -221,9 +216,6 @@ export default function MapPage() {
       setLastUpdate(new Date())
     } catch (err) {
       console.error('Error fetching map data:', err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 

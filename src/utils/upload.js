@@ -2,7 +2,7 @@
 
 export async function uploadFileToGCS({ file, zone = '', notes = '', type = '', apiBaseUrl = '' }) {
   // 1. Request signed URL
-  const res = await fetch(`${apiBaseUrl}/getSignedUploadUrl`, {
+  const res = await fetch(`${apiBaseUrl}/upload/presigned-url`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -11,6 +11,7 @@ export async function uploadFileToGCS({ file, zone = '', notes = '', type = '', 
       zone: zone || 'venue',
       notes,
       type,
+      bucket: null
     }),
   });
   if (!res.ok) throw new Error('Failed to get signed upload URL');

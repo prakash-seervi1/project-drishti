@@ -16,11 +16,19 @@ export default function EmergencyContacts({ emergencyContacts, handleEmergencyCa
                 className={`w-2 h-2 rounded-full ${contact.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
               ></div>
             </div>
-            <div className="text-2xl font-bold text-blue-600 mb-2">{contact.number}</div>
+            <div className="text-2xl font-bold text-blue-600 mb-2">
+              {typeof contact.number === 'object' && contact.number !== null
+                ? Object.entries(contact.number).map(([type, value]) => (
+                    <div key={type} className="text-base text-gray-700">
+                      {type}: {value}
+                    </div>
+                  ))
+                : contact.number}
+            </div>
             <div className="text-sm text-gray-600 mb-3">ETA: {contact.responseTime}</div>
             <div className="flex space-x-2">
               <button
-                onClick={() => handleEmergencyCall(contact.service, contact.number)}
+                onClick={() => handleEmergencyCall(contact.service, typeof contact.number === 'object' && contact.number !== null ? contact.number.phone || contact.number.email || contact.number.radio : contact.number)}
                 className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
               >
                 <PhoneCall className="w-4 h-4 mr-1" />

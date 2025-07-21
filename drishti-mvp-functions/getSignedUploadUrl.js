@@ -28,7 +28,7 @@ const corsHandler = (req, res, callback) => {
 module.exports = functions.https.onRequest(async (req, res) => {
   corsHandler(req, res, async () => {
     try {
-      const { filename, mimetype, zone, notes, type } = req.body;
+      const { filename, mimetype, zone, notes, type, bucket } = req.body;
 
       if (!filename || !mimetype || !zone) {
         return res.status(400).json({ error: "Missing required fields." });
@@ -37,8 +37,15 @@ module.exports = functions.https.onRequest(async (req, res) => {
       const fileId = uuidv4();
       const objectPath = `uploads/${fileId}_${filename}`;
 
-      // Choose bucket based on type
-      const bucketName = type === "venue" ? venueBucket : defaultBucket;
+      // Choose bucket based on request
+      let bucketName;
+      if (bucket) {
+        bucketName = bucket;
+      } else if (type === "venue") {
+        bucketName = venueBucket;
+      } else {
+        bucketName = defaultBucket;
+      }
 
       const options = {
         version: "v4",

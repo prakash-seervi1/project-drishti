@@ -322,6 +322,38 @@ const collectionsData = {
   }
 };
 
+// --- Add more responders for demo ---
+const responderTypes = [
+  "Fire Brigade",
+  "Medical",
+  "Security",
+  "Police",
+  "Ambulance",
+  "Technical"
+];
+const responderNames = [
+  "John Smith", "Sarah Johnson", "Mike Wilson", "Priya Patel", "David Lee", "Maria Garcia", "Ahmed Khan", "Emily Chen", "Carlos Silva", "Anna Ivanova",
+  "James Brown", "Linda White", "Robert Green", "Patricia Black", "Michael Blue", "Jessica Red", "William Orange", "Elizabeth Purple", "Richard Yellow", "Barbara Pink",
+  "Steven Gray", "Susan Gold", "Paul Silver", "Karen Bronze", "Kevin Violet", "Nancy Indigo", "Brian Teal", "Lisa Aqua", "George Olive", "Betty Mint"
+];
+
+// --- Add crowdHistory subcollection data for each zone ---
+const crowdHistoryData = [];
+const now = Date.now();
+for (let zoneNum = 1; zoneNum <= 3; zoneNum++) {
+  const zoneId = `zone-${zoneNum}`;
+  for (let i = 0; i < 15; i++) {
+    crowdHistoryData.push({
+      zoneId,
+      docId: String(now - i * 60000), // 1 min intervals
+      data: {
+        peopleCount: 100 + Math.floor(Math.random()*400),
+        timestamp: new Date(now - i * 60000)
+      }
+    });
+  }
+}
+
 // --- 2. New Venue and Zones as Subcollection ---
 const venueId = 'spring_fest_2024';
 const venueData = {
@@ -510,6 +542,159 @@ const additionalZoneFields = {
   }
 };
 
+// --- Write all zones with full fields before adding crowdHistory ---
+const zonesFullData = [
+  {
+    zoneId: "zone-1",
+    name: "Zone 1",
+    area: 2500,
+    capacity: 500,
+    assignedGates: [0],
+    risk: "none",
+    status: "normal",
+    boundaries: {
+      coordinates: [
+        { lat: 12.9716, lng: 77.5946 },
+        { lat: 12.9726, lng: 77.5956 },
+        { lat: 12.9736, lng: 77.5966 },
+        { lat: 12.9706, lng: 77.5936 }
+      ]
+    },
+    sensors: {
+      cameras: 8,
+      temperature: 2,
+      airQuality: 1,
+      crowdCounters: 4
+    },
+    emergencyExits: [
+      {
+        id: "exit_1",
+        location: { lat: 12.9716, lng: 77.5946 },
+        status: "open"
+      }
+    ],
+    lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+  },
+  {
+    zoneId: "zone-2",
+    name: "Zone 2",
+    area: 2500,
+    capacity: 500,
+    assignedGates: [1],
+    risk: "none",
+    status: "active",
+    boundaries: {
+      coordinates: [
+        { lat: 12.9746, lng: 77.5976 },
+        { lat: 12.9756, lng: 77.5986 },
+        { lat: 12.9766, lng: 77.5996 },
+        { lat: 12.9736, lng: 77.5966 }
+      ]
+    },
+    sensors: {
+      cameras: 6,
+      temperature: 1,
+      airQuality: 1,
+      crowdCounters: 3
+    },
+    emergencyExits: [
+      {
+        id: "exit_3",
+        location: { lat: 12.9746, lng: 77.5976 },
+        status: "open"
+      }
+    ],
+    lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+  },
+  {
+    zoneId: "zone-3",
+    name: "Zone 3",
+    area: 2500,
+    capacity: 500,
+    assignedGates: [2],
+    risk: "none",
+    status: "critical",
+    boundaries: {
+      coordinates: [
+        { lat: 12.9776, lng: 77.6006 },
+        { lat: 12.9786, lng: 77.6016 },
+        { lat: 12.9796, lng: 77.6026 },
+        { lat: 12.9766, lng: 77.5996 }
+      ]
+    },
+    sensors: {
+      cameras: 10,
+      temperature: 3,
+      airQuality: 2,
+      crowdCounters: 5
+    },
+    emergencyExits: [
+      {
+        id: "exit_4",
+        location: { lat: 12.9776, lng: 77.6006 },
+        status: "blocked"
+      }
+    ],
+    lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+  }
+];
+
+// --- Write all responders to Firestore ---
+async function addAllResponders(db) {
+  // Write static responders from collectionsData
+  for (const [docPath, data] of Object.entries(collectionsData)) {
+    if (docPath.startsWith('responders/')) {
+      const responderId = docPath.split('/')[1];
+      await db.collection('responders').doc(responderId).set(data, { merge: true });
+      console.log(`Created/updated responder: ${responderId}`);
+    }
+  }
+  // --- Generate and write 30 demo responders ---
+  for (let i = 0; i < responderNames.length; i++) {
+    const name = responderNames[i];
+    const type = responderTypes[i % responderTypes.length];
+    const responderId = `demo_responder_${String(i+1).padStart(2, '0')}`;
+    const demoResponder = {
+      name,
+      type,
+      status: ["available", "en_route", "on_scene"][i % 3],
+      vehicle: `${type} Vehicle ${i+1}`,
+      position: {
+        lat: 12.97 + Math.random() * 0.02,
+        lng: 77.59 + Math.random() * 0.02,
+        lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+      },
+      contact: {
+        phone: `+91-900000${1000 + i}`,
+        radio: `Channel ${1 + (i % 6)}`,
+        email: `${name.toLowerCase().replace(/ /g, ".")}@demo.gov`
+      },
+      equipment: {
+        batteryLevel: 60 + Math.floor(Math.random() * 40),
+        signalStrength: 2 + (i % 4),
+        medicalKit: i % 2 === 0,
+        defibrillator: i % 3 === 0
+      },
+      assignedIncident: null,
+      eta: null,
+      speed: `${Math.floor(Math.random() * 60)} km/h`,
+      experience: `${2 + (i % 15)} years`,
+      specializations: [type],
+      lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection('responders').doc(responderId).set(demoResponder, { merge: true });
+    console.log(`Created demo responder: ${responderId}`);
+  }
+}
+
+// --- Write all zones to Firestore ---
+async function addAllZones(db) {
+  for (const zone of zonesFullData) {
+    await db.collection('zones').doc(zone.zoneId).set(zone, { merge: true });
+    console.log(`Created/updated zone: ${zone.zoneId}`);
+  }
+}
+
 // --- Main Setup Function ---
 async function setupAllSampleData() {
   // 1. Set all original sample docs
@@ -531,6 +716,12 @@ async function setupAllSampleData() {
     await docRef.set(extraFields, { merge: true });
     console.log(`Updated zone: ${zoneKey} with venue fields.`);
   }
+  // 5. Add all full zones (with boundaries, sensors, etc.)
+  await addAllZones(db);
+  // 6. Add all responders
+  await addAllResponders(db);
+  // 7. Add crowdHistory subcollection data for each zone
+  await addCrowdHistory(db);
   console.log(`All sample data initialized.`);
 }
 
@@ -687,3 +878,10 @@ exports.resetDatabase = functions.https.onRequest(async (req, res) => {
     });
   }
 }); 
+
+async function addCrowdHistory(db) {
+  for (const entry of crowdHistoryData) {
+    await db.collection('zones').doc(entry.zoneId)
+      .collection('crowdHistory').doc(entry.docId).set(entry.data);
+  }
+} 

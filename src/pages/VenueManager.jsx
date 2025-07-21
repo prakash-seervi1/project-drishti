@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import VenueForm from '../components/VenueForm';
 
 export default function VenueManager() {
-  const handleVenueSubmit = (formData) => {
-    // For now, just log the form data keys
-    alert('Venue form submitted! (see console)');
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
+  const [createdVenue, setCreatedVenue] = useState(null);
+
+  const handleVenueSubmit = (result) => {
+    setCreatedVenue(result);
+    alert('Venue created!');
+    console.log('Venue created:', result);
   };
 
   return (
@@ -21,6 +21,18 @@ export default function VenueManager() {
         </h1>
         <p className="mb-6 text-gray-600">Create and manage event venues, auto-generate safety zones, and plan crowd flow.</p>
         <VenueForm onSubmit={handleVenueSubmit} />
+        {createdVenue && createdVenue.zones && createdVenue.zones.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-2">Created Zones</h2>
+            <ul className="list-disc pl-6">
+              {createdVenue.zones.map((zone, idx) => (
+                <li key={zone.zoneId || idx}>
+                  <strong>{zone.zoneId || `Zone ${idx + 1}`}</strong>: Area {zone.area}, Capacity {zone.capacity}, Risk: {zone.risk}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Brain } from "lucide-react"
-import { incidentsAPI } from "../../services/api"
+import { agentAPI } from "../../services/adkApi"
 import ReactMarkdown from "react-markdown"
 import Skeleton from "react-loading-skeleton"
 import 'react-loading-skeleton/dist/skeleton.css'
@@ -18,12 +18,16 @@ export default function AIRecommendations({ incident }) {
     setLoadingAssessment(true)
     setErrorAssessment("")
     setAssessment("")
-    incidentsAPI.getAIResponse({ query: 'Give me a current assessment of this incident. Summarize the key risks and status.', incidentId: incident.id })
+    agentAPI.runAgent({ input: `Give me a current assessment of this incident. Summarize the key risks and status. Incident: ${incident.description || incident.id}` })
       .then(res => {
-        if (res.success) {
-          setAssessment(res.response)
+        if (res && res.answer) {
+          setAssessment(res.answer)
+        } else if (res && res.result && res.result.response) {
+          setAssessment(res.result.response)
+        } else if (res && res.result) {
+          setAssessment(typeof res.result === 'string' ? res.result : JSON.stringify(res.result))
         } else {
-          setErrorAssessment(res.error || "Failed to get assessment")
+          setErrorAssessment("Failed to get assessment")
         }
       })
       .catch(err => setErrorAssessment(err.message || "Error fetching assessment"))
@@ -32,17 +36,21 @@ export default function AIRecommendations({ incident }) {
     setLoadingRecommendations(true)
     setErrorRecommendations("")
     setRecommendations("")
-    incidentsAPI.getAIResponse({ query: 'Provide actionable, prioritized AI recommendations for response, safety, and resource allocation for this incident.', incidentId: incident.id })
+    agentAPI.runAgent({ input: `Provide actionable, prioritized AI recommendations for response, safety, and resource allocation for this incident. Incident: ${incident.description || incident.id}` })
       .then(res => {
-        if (res.success) {
-          setRecommendations(res.response)
+        if (res && res.answer) {
+          setRecommendations(res.answer)
+        } else if (res && res.result && res.result.response) {
+          setRecommendations(res.result.response)
+        } else if (res && res.result) {
+          setRecommendations(typeof res.result === 'string' ? res.result : JSON.stringify(res.result))
         } else {
-          setErrorRecommendations(res.error || "Failed to get recommendations")
+          setErrorRecommendations("Failed to get recommendations")
         }
       })
       .catch(err => setErrorRecommendations(err.message || "Error fetching recommendations"))
       .finally(() => setLoadingRecommendations(false))
-  }, [incident?.id])
+  }, [incident?.id, incident?.description])
 
   return (
     <div>

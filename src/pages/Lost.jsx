@@ -61,7 +61,8 @@ export default function Lost() {
     setResult(null)
     try {
         const res = await fetch(
-          "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/lostAndFound2",
+          // TODO: Replace with new backend endpoint for lost and found
+          // "https://us-central1-project-drishti-mvp-31f1b.cloudfunctions.net/lostAndFound2",
           {
             method: "POST",
             body: formData,
