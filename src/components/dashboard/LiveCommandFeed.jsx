@@ -1,6 +1,10 @@
 import { Video, Maximize2, Camera, Play, Volume2, Eye } from 'lucide-react'
 
 export default function LiveCommandFeed({ selectedZone, setSelectedZone, zoneFeeds, currentTime }) {
+  // Find the selected zone object
+  const selectedZoneObj = zoneFeeds.find(z => z.zone === selectedZone || z.id === selectedZone);
+  const selectedZoneName = selectedZoneObj?.name || selectedZoneObj?.zone || selectedZone;
+
   return (
     <div className="md:col-span-2 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6">
       <div className="flex items-center justify-between mb-4">
@@ -15,8 +19,8 @@ export default function LiveCommandFeed({ selectedZone, setSelectedZone, zoneFee
             className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
           >
             {zoneFeeds.map((zone) => (
-              <option key={zone.zone} value={zone.zone}>
-                {zone.zone}
+              <option key={zone.zone || zone.id} value={zone.zone || zone.id}>
+                {zone.name || zone.zone || zone.id}
               </option>
             ))}
           </select>
@@ -29,7 +33,7 @@ export default function LiveCommandFeed({ selectedZone, setSelectedZone, zoneFee
         <div className="absolute inset-0 flex items-center justify-center text-white">
           <div className="text-center">
             <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <div className="text-lg font-medium">Live Feed - {selectedZone}</div>
+            <div className="text-lg font-medium">Live Feed - {selectedZoneName}</div>
             <div className="text-sm opacity-75">Camera Online • Recording</div>
           </div>
         </div>

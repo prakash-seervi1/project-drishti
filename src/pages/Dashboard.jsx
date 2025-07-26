@@ -15,7 +15,7 @@ import { toast } from 'react-hot-toast';
 
 import {
   DashboardHeader,
-  CriticalAlerts,
+  Alerts,
   AISituationSummary,
   LiveCommandFeed,
   ZoneStatus,
@@ -24,6 +24,8 @@ import {
   ActionCenter,
   EmergencyContacts
 } from "../components/dashboard"
+import AISimpleSummary from '../components/dashboard/AISimpleSummary'
+
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
@@ -58,7 +60,7 @@ export default function Dashboard() {
     windSpeed: "12 km/h",
   })
 
-  const [criticalAlerts, setCriticalAlerts] = useState([])
+  const [alerts, setAlerts] = useState([])
   const [incidentTypes, setIncidentTypes] = useState([])
   const [responderTeams, setResponderTeams] = useState([])
   const [zoneFeeds, setZoneFeeds] = useState([])
@@ -109,48 +111,7 @@ export default function Dashboard() {
         trend: "0"
       })));
       // Set critical alerts (example: filter by priority)
-      setCriticalAlerts(incidents.filter(i => i.priority === 'critical').map(incident => ({
-        id: incident.id,
-        type: incident.type,
-        zone: incident.zone,
-        severity: incident.priority || 'Critical',
-        time: incident.timestamp,
-        status: incident.status
-      })));
       setIncidents(incidents);
-
-      // Fetch responders analytics from new backend
-      let responders = await api.getResponders();
-      if (!Array.isArray(responders) && responders && Array.isArray(responders.responders)) {
-        responders = responders.responders;
-      } else if (!Array.isArray(responders)) {
-        responders = [];
-      }
-      setDashboardData(prev => ({
-        ...prev,
-        totalResponders: responders.length,
-        availableResponders: responders.filter(r => r.status === 'available' || r.status === 'ready').length,
-      }));
-      // Set responder teams data (example: group by type)
-      const teamCounts = {};
-      responders.forEach(responder => {
-        const type = responder.type || responder.teamType || 'General';
-        if (!teamCounts[type]) {
-          teamCounts[type] = { available: 0, total: 0 };
-        }
-        teamCounts[type].total++;
-        if (responder.status === 'available' || responder.status === 'ready') {
-          teamCounts[type].available++;
-        }
-      });
-      setResponderTeams(Object.entries(teamCounts).map(([name, counts]) => ({
-        name,
-        available: counts.available,
-        total: counts.total,
-        status: counts.available > 0 ? 'Ready' : 'Busy',
-        contact: 'N/A'
-      })));
-      setAllResponders(responders);
 
       // Fetch zones data
       let zones = await api.getZones();
@@ -159,6 +120,11 @@ export default function Dashboard() {
       } else if (!Array.isArray(zones)) {
         zones = [];
       }
+      // Build zoneId to zoneName map
+      const zoneMap = {};
+      zones.forEach(zone => {
+        zoneMap[zone.id] = zone.name || zone.id;
+      });
       // Calculate overall crowd density (average across all zones)
       let avgCrowdDensity = 0;
       if (zones.length > 0) {
@@ -197,6 +163,54 @@ export default function Dashboard() {
       if (!zones.find(z => z.id === selectedZone) && zones.length > 0) {
         setSelectedZone(zones[0].id);
       }
+
+      // Fetch alerts from new backend
+      const alertsRes = await api.getAlerts();
+      const alerts = Array.isArray(alertsRes) ? alertsRes : (alertsRes.alerts || []);
+      // Filter for critical alerts and add zoneName
+      const criticalAlerts = alerts
+        // .filter(a => (a.severity && a.severity >= 4) || a.alertType === 'high_risk')
+        .sort((a, b) => b.severity - a.severity)
+        .map(a => ({
+          ...a,
+          severity: a.severity || 3,
+          description: a.description || a.message,
+          zoneName: zoneMap[a.zoneId] || a.target || a.zoneId || 'Unknown'
+        }));
+      setAlerts(criticalAlerts);
+
+      // Fetch responders analytics from new backend
+      let responders = await api.getResponders();
+      if (!Array.isArray(responders) && responders && Array.isArray(responders.responders)) {
+        responders = responders.responders;
+      } else if (!Array.isArray(responders)) {
+        responders = [];
+      }
+      setDashboardData(prev => ({
+        ...prev,
+        totalResponders: responders.length,
+        availableResponders: responders.filter(r => r.status === 'available' || r.status === 'ready').length,
+      }));
+      // Set responder teams data (example: group by type)
+      const teamCounts = {};
+      responders.forEach(responder => {
+        const type = responder.type || responder.teamType || 'General';
+        if (!teamCounts[type]) {
+          teamCounts[type] = { available: 0, total: 0 };
+        }
+        teamCounts[type].total++;
+        if (responder.status === 'available' || responder.status === 'ready') {
+          teamCounts[type].available++;
+        }
+      });
+      setResponderTeams(Object.entries(teamCounts).map(([name, counts]) => ({
+        name,
+        available: counts.available,
+        total: counts.total,
+        status: counts.available > 0 ? 'Ready' : 'Busy',
+        contact: 'N/A'
+      })));
+      setAllResponders(responders);
 
       // Fetch emergency contacts
       let contacts = await api.getEmergencyContacts();
@@ -402,14 +416,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Command Center Dispatch Button */}
-        <div className="flex justify-end mb-4">
-          <button
-            className="px-6 py-3 rounded-xl bg-blue-700 text-white font-bold text-lg shadow-lg hover:bg-blue-800 transition"
-            onClick={handleOpenDispatchModal}
-          >
-            + Dispatch Team
-          </button>
-        </div>
+       
         {/* Timestamp Test Component */}
         {/* <TimestampTest /> */}
 
@@ -417,11 +424,11 @@ export default function Dashboard() {
         <DashboardHeader dashboardData={dashboardData} />
 
         {/* Action Center (moved up) */}
-        <ActionCenter
+        {/* <ActionCenter
           onDispatchTeam={handleOpenDispatchModal}
           onSendAlert={() => setSendAlertModalOpen(true)}
           onAIAnalysis={handleOpenAIModal}
-        />
+        /> */}
         <SendAlertModal
           open={sendAlertModalOpen}
           onClose={() => setSendAlertModalOpen(false)}
@@ -430,51 +437,22 @@ export default function Dashboard() {
           onSendAlert={handleSendAlert}
         />
 
-        {/* Critical Alerts & Situation Summary */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <ErrorBoundary>
-            <CriticalAlerts criticalAlerts={criticalAlerts} />
-          </ErrorBoundary>
-          <AISituationSummary />
+    
+
+        {/* AI Summaries Section */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <AISimpleSummary />
+          <AISituationSummary availableTeams={dashboardData.availableResponders} />
         </div>
 
-        {/* Live Feeds & Zone Monitoring */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <LiveCommandFeed 
-            selectedZone={selectedZone}
-            setSelectedZone={setSelectedZone}
-            zoneFeeds={zoneFeeds}
-            currentTime={new Date()}
-          />
-          <ZoneStatus 
-            selectedZone={selectedZone}
-            setSelectedZone={setSelectedZone}
-            zoneFeeds={zoneFeeds}
-          />
-        </div>
-
-        {/* Incident Analytics & Response Teams */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <IncidentAnalytics incidentTypes={incidentTypes} />
-          <ResponseTeams 
-            responderTeams={responderTeams}
-            handleDispatchResponder={handleDispatchResponder}
-          />
-        </div>
-
-        {/* Emergency Contacts */}
-        <EmergencyContacts 
-          emergencyContacts={emergencyContacts}
-          handleEmergencyCall={handleEmergencyCall}
-        />
-
-        {/* --- Crowd Forecast Analytics Section --- */}
-        <Card sx={{ my: 4, boxShadow: 3, borderRadius: 3 }}>
+   
+     {/* --- Crowd Forecast Analytics Section --- */}
+     <Card sx={{ my: 4, boxShadow: 3, borderRadius: 3 }}>
           <CardContent>
             <Typography variant="h6" color="primary" gutterBottom>
               Crowd Forecast Analytics
             </Typography>
-            <Box sx={{ my: 2 }}>
+            <Box sx={{ my: 2 }} style={{ display: 'none' }}>
               <FormControl fullWidth>
                 <InputLabel id="zone-forecast-select-label">Select Zone</InputLabel>
                 <Select
@@ -494,6 +472,43 @@ export default function Dashboard() {
             {selectedZone && <CrowdForecastChart zoneId={selectedZone} />}
           </CardContent>
         </Card>
+
+        <IncidentAnalytics incidentTypes={incidentTypes} />
+    {/* Critical Alerts & Situation Summary */}{/* Incident Analytics & Response Teams */}
+      <div className="grid md:grid-cols-2 gap-6">
+            <ErrorBoundary>
+              <Alerts alerts={alerts} />
+            </ErrorBoundary>
+          
+          <ResponseTeams 
+            responderTeams={responderTeams}
+            handleDispatchResponder={handleDispatchResponder}
+          />
+        </div>
+
+   
+             {/* Live Feeds & Zone Monitoring */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <LiveCommandFeed 
+            selectedZone={selectedZone}
+            setSelectedZone={setSelectedZone}
+            zoneFeeds={zoneFeeds}
+            currentTime={new Date()}
+          />
+          <ZoneStatus 
+            selectedZone={selectedZone}
+            setSelectedZone={setSelectedZone}
+            zoneFeeds={zoneFeeds}
+          />
+        </div>
+
+
+     {/* Emergency Contacts */}
+       <EmergencyContacts 
+          emergencyContacts={emergencyContacts}
+          handleEmergencyCall={handleEmergencyCall}
+        />
+      
         <DispatchModal
           open={dispatchModalOpen}
           onClose={() => setDispatchModalOpen(false)}

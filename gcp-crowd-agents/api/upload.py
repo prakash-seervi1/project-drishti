@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from uuid import uuid4
-from google.cloud import storage
+from google.cloud import storage, firestore
 from datetime import timedelta
 from fastapi.responses import JSONResponse
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
@@ -11,6 +11,7 @@ router = APIRouter()
 
 # Google Cloud setup
 storage_client = storage.Client()
+firestore_client = firestore.Client()
 
 DEFAULT_BUCKET = "project-drishti-central1-bucket"
 VENUE_BUCKET = "project-drishti-central1-bucket-venues"
@@ -64,7 +65,7 @@ async def get_signed_upload_url(req: UploadRequest):
             "fileUrl": f"https://storage.googleapis.com/{bucket_name}/{object_path}",
             "objectPath": object_path,
             "type": "image" if req.mimetype.startswith("image") else "video",
-            "timestamp": __import__('google.cloud.firestore').firestore.SERVER_TIMESTAMP,
+            "timestamp": firestore.SERVER_TIMESTAMP,
         }
 
         doc_ref = add_document("media", media_doc)

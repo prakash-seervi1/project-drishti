@@ -73,6 +73,18 @@ export default function IncidentDetail() {
         setAssignedResponder(assignedResponder);
         setAssignment(assignmentTransaction);
 
+        // Fix: If zone is missing, fetch by zoneId
+        const zoneId = (incident || incidentData).zoneId;
+        if (!zone && zoneId) {
+          try {
+            const zoneRes = await api.getZoneById(zoneId);
+            const zoneObj = zoneRes.zone || zoneRes;
+            setZone(zoneObj && zoneObj.name ? zoneObj : { id: zoneId, name: zoneObj.name || zoneId });
+          } catch {
+            setZone({ id: zoneId, name: zoneId });
+          }
+        }
+
         // Fetch incident notes
         // const notesResponse = await api.getIncidentNotes(id)
         // const notesData = notesResponse && notesResponse.data ? notesResponse.data : notesResponse;
@@ -248,6 +260,8 @@ export default function IncidentDetail() {
               zone={zone}
               assignedResponder={assignedResponder}
               assignment={assignment}
+              liveData={liveData}
+              showEnvironmentalConditions={!!(liveData && (liveData.temperature || liveData.windSpeed || liveData.visibility || liveData.crowdDensity))}
             />
           )}
           {activeTab === "timeline" && (

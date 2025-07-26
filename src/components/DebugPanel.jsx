@@ -7,12 +7,12 @@ const DebugPanel = ({ data, title = "Debug Data" }) => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <button
+      {/* <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700"
       >
         {isOpen ? 'Hide' : 'Show'} Debug
-      </button>
+      </button> */}
       
       {isOpen && (
         <div className="absolute bottom-12 right-0 w-96 max-h-96 bg-white border border-gray-300 rounded-lg shadow-xl overflow-hidden">

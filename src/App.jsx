@@ -14,6 +14,7 @@ import DesignSystemPage from "./pages/DesignSystemPage";
 import WireframesPage from "./pages/WireframesPage";
 import VenueManager from "./pages/VenueManager";
 import MobileMenu from "./components/MobileMenu"
+import Zone from "./pages/Zone";
 
 
 export default function App() {
@@ -33,25 +34,27 @@ export default function App() {
               <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
                 Home
               </Link>
-              <Link to="/summary" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                Summary
-              </Link>
+              {/* <Link to="/report" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Report
+              </Link> */}
               <Link to="/incidents" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
                 Incidents
               </Link>
-              <Link to="/map" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Map</Link>
-              <Link to="/lost" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Lost</Link>
+              {/* <Link to="/map" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Map</Link> */}
+              {/* <Link to="/lost" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Lost</Link> */}
+              <Link to="/zones" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Zones</Link>
               <Link to="/Upload" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Upload</Link>
               <Link to="/Dashboard" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Dashboard</Link>
 
-              <Link to="/designSystem" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Design System</Link>
-              <Link to="/wireframes" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Wireframes</Link>
+              {/* <Link to="/designSystem" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Design System</Link> */}
+              {/* <Link to="/wireframes" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              Wireframes</Link> */}
               <Link to="/venue-manager" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Venue Manager</Link>
             </div>
@@ -69,13 +72,14 @@ export default function App() {
           <Route path="/summary" element={<Summary />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/report" element={<Report />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/lost" element={<Lost />} />
+          {/* <Route path="/map" element={<Map />} /> */}
+          {/* <Route path="/lost" element={<Lost />} /> */}
+          <Route path="/zones" element={<Zone />} />
           <Route path="/incident/:id" element={<IncidentDetail />} />
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Upload" element={<MediaUpload/>} />
-          <Route path="/designSystem" element={<DesignSystemPage />} />
-          <Route path="/wireframes" element={<WireframesPage />} />
+          {/* <Route path="/designSystem" element={<DesignSystemPage />} /> */}
+          {/* <Route path="/wireframes" element={<WireframesPage />} /> */}
           <Route path="/venue-manager" element={<VenueManager />} />
         </Routes>
       </div>

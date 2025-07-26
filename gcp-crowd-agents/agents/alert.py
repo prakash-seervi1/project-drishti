@@ -6,12 +6,13 @@ class AlertAgent:
     def __init__(self):
         pass
 
-    def send_alert(self, alertType, target, language, message):
+    def send_alert(self, alertType, target, language, message, severity):
         alert_data = {
             "alertType": alertType,
-            "target": target,
+            "zoneId": target,
             "language": language,
             "message": message,
+            "severity": severity,
             "timestamp": datetime.utcnow(),
         }
         add_document("alerts", alert_data)

@@ -26,6 +26,7 @@ class VisionAnalysisAgent:
         file_url = event.get("fileUrl")
         zone = event.get("zone")
         doc_id = event.get("docId")
+        auto_incident = event.get("autoIncident", False)
         if not file_url or not zone:
             print("[VisionAnalysisAgent] Missing fileUrl or zone in event. Skipping processing.")
             return
@@ -75,27 +76,28 @@ Zone context (for location, risk, and other metadata, but NOT for personCount): 
             print(f"[VisionAnalysisAgent] Error analyzing image with Gemini (Vertex AI): {e}")
             return {"success": False, "error": str(e)}
         if doc_id:
-            try:
-                update_document("media", doc_id, {
-                    **analysis,
-                    "processed": True,
-                    "analysisTimestamp": get_collection("media").document(doc_id).get().to_dict().get("analysisTimestamp")
-                })
-                print(f"[VisionAnalysisAgent] Updated Firestore document {doc_id} with analysis: {analysis}")
-                if "personCount" in analysis:
-                    update_document("zones", zone, {"currentOccupancy": analysis["personCount"]})
-                    print(f"[VisionAnalysisAgent] Updated zone {zone} currentOccupancy to {analysis['personCount']}")
-                from datetime import datetime
-                self.comms.publish({
-                    "fileUrl": file_url,
-                    "zone": zone,
-                    "timestamp": datetime.utcnow().isoformat() + "Z",
-                    "docId": doc_id,
-                    **analysis
-                })
-                print(f"[VisionAnalysisAgent] Published media upload event to Pub/Sub.")
-            except Exception as e:
-                print(f"[VisionAnalysisAgent] Error updating Firestore document {doc_id}: {e}")
+            if auto_incident:
+                try:
+                    update_document("media", doc_id, {
+                        **analysis,
+                        "processed": True,
+                        "analysisTimestamp": get_collection("media").document(doc_id).get().to_dict().get("analysisTimestamp")
+                    })
+                    print(f"[VisionAnalysisAgent] Updated Firestore document {doc_id} with analysis: {analysis}")
+                    if "personCount" in analysis:
+                        update_document("zones", zone, {"currentOccupancy": analysis["personCount"]})
+                        print(f"[VisionAnalysisAgent] Updated zone {zone} currentOccupancy to {analysis['personCount']}")
+                    from datetime import datetime
+                    self.comms.publish({
+                        "fileUrl": file_url,
+                        "zone": zone,
+                        "timestamp": datetime.utcnow().isoformat() + "Z",
+                        "docId": doc_id,
+                        **analysis
+                    })
+                    print(f"[VisionAnalysisAgent] Published media upload event to Pub/Sub.")
+                except Exception as e:
+                    print(f"[VisionAnalysisAgent] Error updating Firestore document {doc_id}: {e}")
         else:
             print("[VisionAnalysisAgent] No docId provided in event, skipping Firestore update.")
         return {

@@ -38,11 +38,50 @@ export default function CrowdForecastChart({ zoneId }) {
         if (!zoneRes || (!zoneRes.success && !zoneRes.id)) throw new Error('Failed to fetch zone');
         if (!isMounted) return;
         setZone(zoneRes.data || zoneRes.zone || zoneRes || {});
-        // Fetch crowd history
-        // If you have a new endpoint for analytics, use it; otherwise, skip or mock
-        setHistory([]); // Placeholder, update if you have analytics endpoint
-        // Fetch crowd forecast
-        setForecast([]); // Placeholder, update if you have forecast endpoint
+        // Fetch crowd history (placeholder)
+        setHistory([]);
+        // Fetch crowd forecast for next 12 hours
+        const now = new Date();
+        const forecastResults = [];
+        for (let i = 1; i <= 12; i++) {
+          const future = new Date(now.getTime() + i * 60 * 60 * 1000);
+          // Format timestamp: YYYY-MM-DD HH:MM:SS+0000
+          const pad = n => n.toString().padStart(2, '0');
+          const ts = `${future.getFullYear()}-${pad(future.getMonth() + 1)}-${pad(future.getDate())} ${pad(future.getHours())}:${pad(future.getMinutes())}:${pad(future.getSeconds())}+0000`;
+          const payload = {
+            timestamp: ts,
+            zoneId,
+            day_of_week: future.toLocaleString('en-US', { weekday: 'long' }),
+            hour_of_day: String(future.getHours()),
+            lag_peopleCount_1: String(zoneRes.data?.lastPersonCount || 0),
+            rolling_avg_5min: zoneRes.data?.lastRollingAvg || 0,
+            crowdDensity: zoneRes.data?.lastCrowdDensity || 'moderate'
+          };
+          try {
+            const res = await fetch('https://gcp-crowd-agents-268678901849.us-central1.run.app/api/predict', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            let predictionValue = data.prediction;
+            if (Array.isArray(predictionValue)) {
+              predictionValue = predictionValue[0];
+            }
+            if (predictionValue && typeof predictionValue === 'object' && 'value' in predictionValue) {
+              predictionValue = predictionValue.value;
+            }
+            forecastResults.push({
+              type: 'forecast',
+              timestamp: future,
+              peopleCount: predictionValue,
+              crowdDensity: payload.crowdDensity
+            });
+          } catch {
+            // Optionally handle per-request errors
+          }
+        }
+        if (isMounted) setForecast(forecastResults);
         setLoading(false);
       } catch (err) {
         if (isMounted) {
@@ -89,9 +128,9 @@ export default function CrowdForecastChart({ zoneId }) {
   return (
     <Card sx={{ my: 2, boxShadow: 3, borderRadius: 3 }}>
       <CardContent>
-        <Typography variant="h6" color="primary" gutterBottom>
+        {/* <Typography variant="h6" color="primary" gutterBottom>
           Crowd Analytics for {zone.name || zoneId}
-        </Typography>
+        </Typography> */}
         <Typography variant="body2" color="text.secondary" gutterBottom>
           Capacity: {zone.capacity || 'N/A'} | Current: {zone.lastPersonCount || 'N/A'} ({zone.lastCrowdDensity || 'N/A'})
         </Typography>

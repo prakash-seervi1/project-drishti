@@ -18,7 +18,7 @@ export default function AIRecommendations({ incident }) {
     setLoadingAssessment(true)
     setErrorAssessment("")
     setAssessment("")
-    agentAPI.runAgent({ input: `Give me a current assessment of this incident. Summarize the key risks and status. Incident: ${incident.description || incident.id}` })
+    agentAPI.runAgent({ input: `Give me a current assessment of this incident. Summarize the key risks and status. Incident: ${incident.description || incident.id}`, sessionId: 'incident_assessment' })
       .then(res => {
         if (res && res.answer) {
           setAssessment(res.answer)
@@ -36,7 +36,7 @@ export default function AIRecommendations({ incident }) {
     setLoadingRecommendations(true)
     setErrorRecommendations("")
     setRecommendations("")
-    agentAPI.runAgent({ input: `Provide actionable, prioritized AI recommendations for response, safety, and resource allocation for this incident. Incident: ${incident.description || incident.id}` })
+    agentAPI.runAgent({ input: `Provide actionable, prioritized AI recommendations for response, safety, and resource allocation for this incident. Incident: ${incident.description || incident.id}`, sessionId: 'incident_recommendations' })
       .then(res => {
         if (res && res.answer) {
           setRecommendations(res.answer)

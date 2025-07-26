@@ -14,6 +14,8 @@ export default function MediaUpload() {
   const [zonesLoading, setZonesLoading] = useState(false)
   const [zonesError, setZonesError] = useState("")
   const [analysisStatus, setAnalysisStatus] = useState("")
+  const [autoIncident, setAutoIncident] = useState(true);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   useEffect(() => {
     const fetchZones = async () => {
@@ -23,7 +25,7 @@ export default function MediaUpload() {
         const res = await api.getZones()
         const zoneList = Array.isArray(res) ? res : (res.zones || [])
         setZones(zoneList)
-      } catch (err) {
+      } catch {
         setZonesError("Failed to load zones. Please try again.")
       } finally {
         setZonesLoading(false)
@@ -66,6 +68,7 @@ export default function MediaUpload() {
     setLoading(true)
     setMessage(null)
     setAnalysisStatus("")
+    setAnalysisResult(null)
     try {
       // Get signed URL
       const data = await api.getSignedUploadUrl({
@@ -74,7 +77,8 @@ export default function MediaUpload() {
         zone,
         notes,
         type: '', // Always send a string
-        bucket: 'project-drishti-central1-bucket-vision'
+        bucket: 'project-drishti-central1-bucket-vision',
+        autoIncident // Pass to backend if needed
       });
       if (!data.url) throw new Error("No upload URL returned")
       // Upload the file directly
@@ -91,15 +95,19 @@ export default function MediaUpload() {
         const analysisRes = await api.analyzeMedia({
           fileUrl,
           zone,
-          docId: data.docId // Pass docId from upload response
+          docId: data.docId, // Pass docId from upload response
+          autoIncident
         })
         if (analysisRes && analysisRes.success) {
-          setAnalysisStatus(`People detected: ${analysisRes.personCount}`);
+          setAnalysisResult(analysisRes);
+          setAnalysisStatus("");
         } else {
+          setAnalysisResult(null);
           setAnalysisStatus('Image uploaded, but analysis failed.');
         }
-      } catch (err) {
-        setAnalysisStatus('Image uploaded, but analysis failed.')
+      } catch {
+        setAnalysisResult(null);
+        setAnalysisStatus('Image uploaded, but analysis failed.');
       }
       setZone("")
       setNotes("")
@@ -111,32 +119,6 @@ export default function MediaUpload() {
     }
   };
   
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!zone || !file) {
-      setMessage({ type: "error", text: "Zone and media file are required." })
-      return
-    }
-
-    setLoading(true)
-    setMessage(null)
-
-    try {
-      const formData = new FormData()
-      const res = await api.uploadMedia(formData);
-      const data = await res.json()
-      setMessage({ type: "success", text: data.message || "Uploaded successfully!" })
-      setZone("")
-      setNotes("")
-      setFile(null)
-    } catch (err) {
-      console.error(err)
-      setMessage({ type: "error", text: "Upload failed. Please try again." })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const getFileIcon = () => {
     if (!file) return <Upload className="w-8 h-8 text-gray-400" />
@@ -211,6 +193,20 @@ export default function MediaUpload() {
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm resize-none"
               />
+            </div>
+
+            {/* Auto Incident Creation Toggle */}
+            <div className="mb-4 flex items-center">
+              <input
+                type="checkbox"
+                id="autoIncident"
+                checked={autoIncident}
+                onChange={e => setAutoIncident(e.target.checked)}
+                className="mr-2"
+              />
+              <label htmlFor="autoIncident" className="font-medium text-gray-900">
+                Auto Incident Creation
+              </label>
             </div>
 
             {/* File Upload Area */}
@@ -289,6 +285,32 @@ export default function MediaUpload() {
               <div className="flex items-center px-4 py-3 rounded-xl text-sm bg-blue-50 text-blue-800 border border-blue-200 mt-4">
                 <Loader2 className="w-5 h-5 mr-2 text-blue-600 animate-spin" />
                 {analysisStatus}
+              </div>
+            )}
+
+            {/* Analysis Result Card */}
+            {analysisResult && (
+              <div className="bg-white/90 border border-gray-200 rounded-2xl shadow-lg p-6 mt-6 max-w-2xl mx-auto">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <CheckCircle className="w-6 h-6 mr-2 text-green-600" />
+                  Analysis Result
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div><span className="font-semibold">People Detected:</span> {analysisResult.personCount}</div>
+                  <div><span className="font-semibold">Crowd Density:</span> {analysisResult.crowdDensity}</div>
+                  <div><span className="font-semibold">Smoke Detected:</span> <span className={analysisResult.smokeDetected ? 'text-red-600 font-bold' : 'text-green-700'}>{analysisResult.smokeDetected ? 'Yes' : 'No'}</span></div>
+                  <div><span className="font-semibold">Fire Detected:</span> <span className={analysisResult.fireDetected ? 'text-red-600 font-bold' : 'text-green-700'}>{analysisResult.fireDetected ? 'Yes' : 'No'}</span></div>
+                  <div><span className="font-semibold">Stampede Detected:</span> <span className={analysisResult.stampedeDetected ? 'text-red-600 font-bold' : 'text-green-700'}>{analysisResult.stampedeDetected ? 'Yes' : 'No'}</span></div>
+                  <div><span className="font-semibold">Medical Emergency:</span> <span className={analysisResult.medicalEmergency ? 'text-red-600 font-bold' : 'text-green-700'}>{analysisResult.medicalEmergency ? 'Yes' : 'No'}</span></div>
+                  <div><span className="font-semibold">Potential Risk:</span> <span className={analysisResult.potentialRisk ? 'text-red-600 font-bold' : 'text-green-700'}>{analysisResult.potentialRisk ? 'Yes' : 'No'}</span></div>
+                  <div><span className="font-semibold">Incident Recommended:</span> <span className={analysisResult.incidentRecommended ? 'text-orange-600 font-bold' : 'text-green-700'}>{analysisResult.incidentRecommended ? 'Yes' : 'No'}</span></div>
+                  <div className="md:col-span-2"><span className="font-semibold">Incident Type:</span> {analysisResult.incidentType}</div>
+                </div>
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-2">
+                  <span className="font-semibold text-yellow-800">Suggested Action:</span>
+                  <div className="text-gray-900 mt-1">{analysisResult.suggestedAction}</div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">Zone: {analysisResult.zone} | File: <a href={analysisResult.fileUrl} target="_blank" rel="noopener noreferrer" className="underline">View Media</a></div>
               </div>
             )}
 

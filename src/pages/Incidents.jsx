@@ -50,8 +50,8 @@ export default function Incidents() {
           ...incident,
           // Convert timestamp to Firestore-style object for compatibility
           timestamp: incident.timestamp
-            ? { seconds: Math.floor(new Date(incident.timestamp).getTime() / 1000) }
-            : { seconds: Date.now() / 1000 },
+            ? { _seconds: Math.floor(new Date(incident.timestamp).getTime() / 1000) }
+            : { _seconds: Math.floor(Date.now() / 1000) },
           // Use zoneId for mapping, but keep zone as undefined (zoneMap will fill it in)
           zone: undefined,
         }));
@@ -124,22 +124,27 @@ export default function Incidents() {
   useEffect(() => {
     const fetchZones = async () => {
       try {
-        const response = await api.getZones()
-        if (response.success) {
-          // Create a map of zoneId -> zone object
-          const map = {}
-          for (const zone of response.data?.zones || []) {
-            map[zone.id] = zone
-          }
-          setZoneMap(map)
+        const response = await api.getZones();
+        let zones = [];
+        if (Array.isArray(response)) {
+          zones = response;
+        } else if (response.zones) {
+          zones = response.zones;
+        } else if (response.data?.zones) {
+          zones = response.data.zones;
         }
+        const map = {};
+        for (const zone of zones) {
+          map[zone.id] = zone;
+        }
+        setZoneMap(map);
       } catch (err) {
-        console.error('Error fetching zones:', err)
-        setZoneMap({})
+        console.error('Error fetching zones:', err);
+        setZoneMap({});
       }
-    }
-    fetchZones()
-  }, [])
+    };
+    fetchZones();
+  }, []);
 
   // Get status counts for overview
   const statusCounts = getStatusCounts(incidents)

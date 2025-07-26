@@ -7,12 +7,12 @@ export default function ZoneStatus({ selectedZone, setSelectedZone, zoneFeeds })
         <Eye className="w-6 h-6 mr-2 text-purple-500" />
         Zone Status
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
         {zoneFeeds.map((zone) => (
           <div
-            key={zone.zone}
+            key={zone.id || zone.zone}
             className={`p-3 rounded-lg border cursor-pointer transition-all ${
-              selectedZone === zone.zone
+              selectedZone === zone.id || selectedZone === zone.zone
                 ? "border-blue-500 bg-blue-50"
                 : zone.status === "Critical"
                   ? "border-red-300 bg-red-50"
@@ -20,10 +20,10 @@ export default function ZoneStatus({ selectedZone, setSelectedZone, zoneFeeds })
                     ? "border-yellow-300 bg-yellow-50"
                     : "border-gray-300 bg-gray-50"
             }`}
-            onClick={() => setSelectedZone(zone.zone)}
+            onClick={() => setSelectedZone(zone.id || zone.zone)}
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="font-medium text-gray-900">{zone.zone}</div>
+              <div className="font-medium text-gray-900">{zone.name || zone.zone}</div>
               <div
                 className={`w-2 h-2 rounded-full ${
                   zone.camera === "Online" ? "bg-green-500" : "bg-red-500"

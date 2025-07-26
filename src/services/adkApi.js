@@ -4,6 +4,7 @@ const BASE_URL = "https://gcp-crowd-agents-268678901849.us-central1.run.app/api"
 export const api = {
   // Incidents
   getIncidents: async () => (await fetch(`${BASE_URL}/incidents`)).json(),
+  getActiveIncidents: async () => (await fetch(`${BASE_URL}/incidents/active`)).json(),
   getIncidentById: async (id) => (await fetch(`${BASE_URL}/incidents/${id}`)).json(),
   getIncidentsByStatus: async (status) => (await fetch(`${BASE_URL}/incidents/status/${status}`)).json(),
   getIncidentsByZone: async (zoneId) => (await fetch(`${BASE_URL}/incidents/zone/${zoneId}`)).json(),
@@ -11,30 +12,34 @@ export const api = {
   // Zones
   getZones: async () => (await fetch(`${BASE_URL}/zones`)).json(),
   getZoneById: async (id) => (await fetch(`${BASE_URL}/zones/${id}`)).json(),
-  getZonesByStatus: async (status) => (await fetch(`${BASE_URL}/zones/status/${status}`)).json(),
-  getZonesByRisk: async (risk) => (await fetch(`${BASE_URL}/zones/risk/${risk}`)).json(),
+  // (Add getZoneById, getZonesByStatus, getZonesByRisk if you add those endpoints)
 
   // Responders
   getResponders: async () => (await fetch(`${BASE_URL}/responders`)).json(),
-  getResponderById: async (id) => (await fetch(`${BASE_URL}/responders/${id}`)).json(),
-  getRespondersByStatus: async (status) => (await fetch(`${BASE_URL}/responders/status/${status}`)).json(),
-  getRespondersByType: async (type) => (await fetch(`${BASE_URL}/responders/type/${type}`)).json(),
+  getAvailableResponders: async () => (await fetch(`${BASE_URL}/responders/available`)).json(),
+  // (Add getResponderById, getRespondersByStatus, getRespondersByType if you add those endpoints)
+
+  // Dispatch Responder (uses new endpoint)
+  dispatchResponder: async ({ responderId, incidentId }) => {
+    const response = await fetch(`${BASE_URL}/assign_responder_to_incident`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ incident_id: incidentId, responder_id: responderId }),
+    });
+    return await response.json();
+  },
+
+  // Alerts
+  getAlerts: async () => (await fetch(`${BASE_URL}/alerts`)).json(),
+
+  // Suggest zones needing responders
+  suggestZonesNeedingResponders: async () => (await fetch(`${BASE_URL}/suggest_zones_needing_responders`)).json(),
 
   // Emergency Contacts
   getEmergencyContacts: async () => (await fetch(`${BASE_URL}/emergency_contacts`)).json(),
   getEmergencyContactById: async (id) => (await fetch(`${BASE_URL}/emergency_contacts/${id}`)).json(),
   getEmergencyContactsByType: async (type) => (await fetch(`${BASE_URL}/emergency_contacts/type/${type}`)).json(),
   getEmergencyContactsByStatus: async (isActive) => (await fetch(`${BASE_URL}/emergency_contacts/status/${isActive}`)).json(),
-
-  // Dispatch Responder
-  dispatchResponder: async ({ responderId, zoneId, notes }) => {
-    const response = await fetch(`${BASE_URL}/dispatch_responder`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ responderId, zoneId, notes }),
-    });
-    return await response.json();
-  },
 
   // Send Alert
   sendAlert: async ({ alertType, target, language, message }) => {
@@ -109,11 +114,11 @@ export const api = {
   },
 
   // Vision Analysis
-  analyzeMedia: async ({ fileUrl, zone, docId }) => {
+  analyzeMedia: async ({ fileUrl, zone, docId,autoIncident=false }) => {
     const response = await fetch(`${BASE_URL}/analyze-media`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fileUrl, zone, docId }),
+      body: JSON.stringify({ fileUrl, zone, docId, autoIncident }),
     });
     return await response.json();
   },
@@ -128,15 +133,21 @@ export const api = {
     if (!response.ok) throw new Error((await response.json()).detail || 'Failed to create venue');
     return await response.json();
   },
+
+  // Get responders assigned to an incident
+  getAssignedResponders: async (incidentId) => {
+    const response = await fetch(`${BASE_URL}/responders/assigned_to_incident/${incidentId}`);
+    return await response.json();
+  },
 };
 
 // Agent Orchestrator API
 export const agentAPI = {
-  runAgent: async ({ input }) => {
+  runAgent: async ({ input,sessionId="default" }) => {
     const response = await fetch("https://gcp-crowd-agents-268678901849.us-central1.run.app/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query:input }),
+      body: JSON.stringify({ query:input, session_id:sessionId }),
     });
     return await response.json();
   },

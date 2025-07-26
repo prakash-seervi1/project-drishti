@@ -27,7 +27,7 @@ class VenuesAgent:
         finalZones = zones
 
         # If autoZone, use Gemini to suggest zones
-        if autoZone and imageUrl:
+        if imageUrl:
             gcs_match = imageUrl.replace("https://storage.googleapis.com/", "").split("/", 1)
             if len(gcs_match) != 2:
                 raise ValueError("Invalid imageUrl format for GCS.")
@@ -38,10 +38,16 @@ class VenuesAgent:
             prompt = (
                 f"Given a venue of type '{venueType}' with area {venueArea} sq.ft, "
                 f"{entryGates} entry gates, and crowd type '{crowdType}', analyze the uploaded layout image and suggest an optimal division into safety zones. "
-                "For each zone, return a JSON array with: zoneId, area (sq.ft), capacity (standing: 5 sq.ft/person, seating: 10 sq.ft/person), assignedGates (array of gate indices), and risk (none, cascading, overcrowding, etc). "
+                "For each zone, return a JSON array with: "
+                "zoneId (must be unique and prefixed with the venueId, e.g. '<venueId>_zone-1'), "
+                "name (human-friendly zone name), "
+                "area (sq.ft), "
+                "capacity (number), "
+                "assignedGates (array of gate indices), "
+                "risk (none, cascading, overcrowding, etc). "
                 "Example:\n"
-                "[{\"zoneId\": \"zone-1\", \"area\": 2500, \"capacity\": 500, \"assignedGates\": [0], \"risk\": \"none\"}, ...]\n"
-                "Return ONLY the JSON array."
+                f"[{{\"zoneId\": \"{eventName.lower().replace(' ', '_')}_zone-1\", \"name\": \"Main Hall\", \"area\": 2500, \"capacity\": 500, \"assignedGates\": [0], \"risk\": \"none\"}}, ...]"
+                "\nReturn ONLY the JSON array."
             )
             # NOTE: query_gemini currently only supports text. You may need to adapt this to send image if your backend supports it.
             gemini_response = query_gemini(prompt)
@@ -73,13 +79,37 @@ class VenuesAgent:
             "createdBy": createdBy or None,
             "zones": finalZones if isinstance(finalZones, list) else [],
         }
-        self.db.collection("venues").document(venueId).set(venue_data)
 
+        if autoZone:
+            self.db.collection("venues").document(venueId).set(venue_data)
+      
         # Create each zone as a subcollection doc
-        if isinstance(finalZones, list) and finalZones:
+        if autoZone and isinstance(finalZones, list) and finalZones:
             zones_col = self.db.collection("venues").document(venueId).collection("zones")
-            for zone in finalZones:
-                zone_id = zone.get("zoneId") or f"zone-{os.urandom(3).hex()}"
+            for idx, zone in enumerate(finalZones):
+                # Ensure unique zoneId with venueId prefix
+                zone_id = zone.get("zoneId") or f"{venueId}_zone-{idx+1}"
                 zones_col.document(zone_id).set(zone)
 
+                # Also insert into top-level 'zones' collection
+                zone_doc = {
+                    "id": zone_id,
+                    "name": zone.get("name") or zone.get("zoneId") or zone_id,
+                    "venueId": venueId,
+                    "venueName": eventName,
+                    "area": zone.get("area"),
+                    "capacity": zone.get("capacity"),
+                    "assignedGates": zone.get("assignedGates", []),
+                    "risk": zone.get("risk", "none"),
+                    "status": "normal",  # or infer from risk/occupancy
+                    "currentOccupancy": 0,
+                    "incidents": 0,
+                    "lastUpdate": firestore.SERVER_TIMESTAMP,
+                }
+                self.db.collection("zones").document(zone_id).set(zone_doc)
+
         return {"message": "Venue and zones created", "venueId": venueId, "zones": venue_data["zones"]} 
+
+
+
+        

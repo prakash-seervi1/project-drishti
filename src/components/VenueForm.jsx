@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { uploadFileToGCS } from '../utils/upload';
 import { api } from '../services/adkApi';
 
 const initialState = {
@@ -39,6 +38,7 @@ export default function VenueForm({ onSubmit }) {
     if (!form.eventName.trim()) newErrors.eventName = 'Event name required';
     if (!form.venueArea || isNaN(form.venueArea) || Number(form.venueArea) <= 0) newErrors.venueArea = 'Valid area required';
     if (!form.entryGates || isNaN(form.entryGates) || Number(form.entryGates) <= 0) newErrors.entryGates = 'Valid number of gates required';
+    if (!form.layoutImage) newErrors.layoutImage = 'Layout image is required';
     return newErrors;
   };
 
@@ -138,7 +138,7 @@ export default function VenueForm({ onSubmit }) {
         {errors.venueArea && <div className="text-red-500 text-sm">{errors.venueArea}</div>}
       </div>
       <div className="mb-4">
-        <label className="block font-medium mb-1">Upload Layout Image (optional)</label>
+        <label className="block font-medium mb-1">Upload Layout Image *</label>
         <input
           type="file"
           name="layoutImage"
@@ -146,6 +146,7 @@ export default function VenueForm({ onSubmit }) {
           onChange={handleChange}
           className="w-full"
         />
+        {errors.layoutImage && <div className="text-red-500 text-sm">{errors.layoutImage}</div>}
       </div>
       <div className="mb-4">
         <label className="block font-medium mb-1">Number of Entry Gates *</label>

@@ -11,3 +11,8 @@ redis
 Pillow
 google-cloud-texttospeech>=2.15.0 
 google-cloud-storage>=2.10.0 
+google-adk
+SQLAlchemy>=2.0
+PyMySQL>=1.0 
+anthropic
+aiohttp

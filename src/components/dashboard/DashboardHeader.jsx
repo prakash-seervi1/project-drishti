@@ -32,35 +32,35 @@ export default function DashboardHeader({ dashboardData }) {
           value={dashboardData.totalIncidents}
           icon={<AlertTriangle className="w-5 h-5" />}
           color="bg-red-500"
-          trend="+5"
+          // trend="+5"
         />
         <StatCard
           title="Active Now"
           value={dashboardData.activeIncidents}
           icon={<Activity className="w-5 h-5" />}
           color="bg-orange-500"
-          trend="+2"
+          // trend="+2"
         />
         <StatCard
           title="Resolved Today"
           value={dashboardData.resolvedToday}
           icon={<CheckCircle className="w-5 h-5" />}
           color="bg-green-500"
-          trend="+8"
+          // trend="+8"
         />
         <StatCard
           title="Available Teams"
           value={`${dashboardData.availableResponders}/${dashboardData.totalResponders}`}
           icon={<UserCheck className="w-5 h-5" />}
           color="bg-blue-500"
-          trend="0"
+          // trend="0"
         />
         <StatCard
           title="Zones Monitored"
           value={dashboardData.zonesMonitored}
           icon={<Map className="w-5 h-5" />}
           color="bg-purple-500"
-          trend="0"
+          // trend="0"
         />
         <StatCard
           title="Crowd Density"

@@ -43,22 +43,41 @@ export default function IncidentDetails({ incident, zone }) {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Priority:</span>
-          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">{incident.priority || 'High'}</span>
+          {(() => {
+            const rawPriority = incident.priority ? String(incident.priority).toLowerCase() : '';
+            const priority = rawPriority
+              ? rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1)
+              : 'Unknown';
+            const priorityColor = priority === 'High'
+              ? 'bg-red-100 text-red-800'
+              : priority === 'Medium'
+                ? 'bg-yellow-100 text-yellow-800'
+                : priority === 'Low'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-gray-100 text-gray-800';
+            return (
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityColor}`}>{priority}</span>
+            );
+          })()}
         </div>
         {zone && (
           <>
             <div className="flex justify-between">
               <span className="text-gray-600">Capacity:</span>
-              <span className="font-medium text-gray-900">{zone.capacity?.currentOccupancy || 'N/A'} / {zone.capacity?.maxOccupancy || 'N/A'}</span>
+              <span className="font-medium text-gray-900">{zone.currentOccupancy ?? 'N/A'} / {zone.capacity ?? 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Crowd Density:</span>
-              <span className="font-medium text-gray-900">{zone.capacity?.crowdDensity || 'N/A'}%</span>
+              <span className="font-medium text-gray-900">
+                {zone.currentOccupancy != null && zone.capacity ? `${Math.round((zone.currentOccupancy / zone.capacity) * 100)}%` : 'N/A%'}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Sensors:</span>
-              <span className="font-medium text-gray-900">Cameras: {zone.sensors?.cameras || 0}, Temp: {zone.sensors?.temperature || 0}, Air: {zone.sensors?.airQuality || 0}</span>
-            </div>
+            {zone.sensors && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Sensors:</span>
+                <span className="font-medium text-gray-900">Cameras: {zone.sensors.cameras || 0}, Temp: {zone.sensors.temperature || 0}, Air: {zone.sensors.airQuality || 0}</span>
+              </div>
+            )}
           </>
         )}
       </div>

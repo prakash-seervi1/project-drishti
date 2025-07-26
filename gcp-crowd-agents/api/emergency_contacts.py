@@ -47,9 +47,10 @@ def send_alert(payload: dict = Body(...)):
     try:
         result = alert_agent.send_alert(
             alertType=payload.get("alertType"),
-            target=payload.get("target"),
+            target=payload.get("zoneId"),
             language=payload.get("language", "en"),
             message=payload.get("message"),
+            severity=payload.get("severity", 0),
         )
         return result
     except Exception as e:

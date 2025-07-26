@@ -13,7 +13,8 @@ export default function OverviewTab({
   relatedIncidents ,
   zone,
   assignedResponder,
-  assignment
+  assignment,
+  showEnvironmentalConditions
 }) {
   return (
     <div className="grid md:grid-cols-2 gap-8">
@@ -27,7 +28,7 @@ export default function OverviewTab({
           </p>
         </div>
 
-        <EnvironmentalConditions liveData={liveData} />
+        {showEnvironmentalConditions && <EnvironmentalConditions liveData={liveData} />}
       </div>
 
       <div className="space-y-6">

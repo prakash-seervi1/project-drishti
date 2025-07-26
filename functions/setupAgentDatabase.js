@@ -53,47 +53,58 @@ async function setupAgentDatabase() {
   await db.collection('responders').doc('responder_001').set({
     name: "John Smith",
     type: "Fire Brigade",
-    status: "available",
     vehicle: "Fire Truck 1",
     position: { lat: 12.9716, lng: 77.5946, lastUpdate: admin.firestore.FieldValue.serverTimestamp() },
     contact: { phone: "+91-9876543210", radio: "Channel 1", email: "john.smith@fire.gov" },
     equipment: { batteryLevel: 85, signalStrength: 4, medicalKit: true, defibrillator: false },
-    assignedIncident: null,
-    eta: null,
-    speed: "0 km/h",
     experience: "8 years",
     specializations: ["Fire Suppression", "Rescue Operations"],
     lastUpdate: admin.firestore.FieldValue.serverTimestamp()
   });
+  await db.collection('responder_status_updates').add({
+    responderId: "responder_001",
+    status: "available",
+    action: "initialized",
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    location: { lat: 12.9716, lng: 77.5946 }
+  });
+
   await db.collection('responders').doc('responder_002').set({
     name: "Sarah Johnson",
     type: "Medical",
-    status: "en_route",
     vehicle: "Ambulance 2",
     position: { lat: 12.9726, lng: 77.5956, lastUpdate: admin.firestore.FieldValue.serverTimestamp() },
     contact: { phone: "+91-9876543211", radio: "Channel 2", email: "sarah.johnson@medical.gov" },
     equipment: { batteryLevel: 92, signalStrength: 5, medicalKit: true, defibrillator: true },
-    assignedIncident: "incident_002",
-    eta: "3 min",
-    speed: "45 km/h",
     experience: "5 years",
     specializations: ["Emergency Medicine", "Trauma Care"],
     lastUpdate: admin.firestore.FieldValue.serverTimestamp()
   });
+  await db.collection('responder_status_updates').add({
+    responderId: "responder_002",
+    status: "en_route",
+    action: "initialized",
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    location: { lat: 12.9726, lng: 77.5956 }
+  });
+
   await db.collection('responders').doc('responder_003').set({
     name: "Mike Wilson",
     type: "Security",
-    status: "on_scene",
     vehicle: "Patrol Car 3",
     position: { lat: 12.9736, lng: 77.5966, lastUpdate: admin.firestore.FieldValue.serverTimestamp() },
     contact: { phone: "+91-9876543212", radio: "Channel 3", email: "mike.wilson@security.gov" },
     equipment: { batteryLevel: 78, signalStrength: 3, medicalKit: false, defibrillator: false },
-    assignedIncident: "incident_003",
-    eta: "0 min",
-    speed: "0 km/h",
     experience: "12 years",
     specializations: ["Crowd Control", "Surveillance"],
     lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+  });
+  await db.collection('responder_status_updates').add({
+    responderId: "responder_003",
+    status: "on_scene",
+    action: "initialized",
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    location: { lat: 12.9736, lng: 77.5966 }
   });
 
   // 4. Emergency Contacts

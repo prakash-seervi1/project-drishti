@@ -381,7 +381,7 @@ KEY TALKING POINTS:
                   <li><b>Zone Status:</b> <span className="text-gray-600">Overview and quick status for all zones. (Component: <code>ZoneStatus</code>)</span></li>
                   <li><b>Action Center:</b> <span className="text-gray-600">Quick actions for dispatch, alerts, and routing. (Component: <code>ActionCenter</code>)</span></li>
                   <li><b>Emergency Contacts:</b> <span className="text-gray-600">Quick-call and status for emergency services. (Component: <code>EmergencyContacts</code>)</span></li>
-                  <li><b>Critical Alerts & Analytics:</b> <span className="text-gray-600">Real-time alerts and incident analytics. (Components: <code>CriticalAlerts</code>, <code>IncidentAnalytics</code>)</span></li>
+                  <li><b>Critical Alerts & Analytics:</b> <span className="text-gray-600">Real-time alerts and incident analytics. (Components: <code>Alerts</code>, <code>IncidentAnalytics</code>)</span></li>
                   <li><b>AI Situation Summary:</b> <span className="text-gray-600">AI-powered summary and recommendations. (Component: <code>AISituationSummary</code>)</span></li>
                 </ul>
               </div>

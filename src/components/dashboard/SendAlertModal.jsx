@@ -17,21 +17,22 @@ const LANGUAGES = [
   // Add more as needed
 ];
 
-export default function SendAlertModal({ open, onClose, zones, teams, onSendAlert }) {
+export default function SendAlertModal({ open, onClose, zones, onSendAlert }) {
   const [alertType, setAlertType] = useState("general");
-  const [target, setTarget] = useState("");
+  const [zoneId, setZoneId] = useState("");
   const [language, setLanguage] = useState("en");
   const [message, setMessage] = useState("");
   const [generating, setGenerating] = useState(false);
   const [audioBase64, setAudioBase64] = useState("");
   const [audioLoading, setAudioLoading] = useState(false);
+  const [severity, setSeverity] = useState(3); // default to medium
 
   if (!open) return null;
 
   const handleGenerateAI = async () => {
     setGenerating(true);
     try {
-      const res = await api.generateAlertMessage({ alertType, target, language });
+      const res = await api.generateAlertMessage({ alertType, zoneId, language, severity });
       if (res.success && res.message) {
         setMessage(res.message);
       } else {
@@ -74,7 +75,7 @@ export default function SendAlertModal({ open, onClose, zones, teams, onSendAler
         <form
           onSubmit={e => {
             e.preventDefault();
-            onSendAlert({ alertType, target, language, message });
+            onSendAlert({ alertType, zoneId, language, message, severity });
             onClose();
           }}
           className="space-y-4"
@@ -93,20 +94,32 @@ export default function SendAlertModal({ open, onClose, zones, teams, onSendAler
             </select>
           </div>
           <div>
-            <label className="block font-medium mb-1">Target</label>
+            <label className="block font-medium mb-1">Severity</label>
             <select
-              value={target}
-              onChange={e => setTarget(e.target.value)}
+              value={severity}
+              onChange={e => setSeverity(Number(e.target.value))}
               className="w-full border rounded px-3 py-2"
               required
             >
-              <option value="">Select...</option>
-              <option value="all">All Zones/Teams</option>
+              <option value={5}>5 - Critical</option>
+              <option value={4}>4 - High</option>
+              <option value={3}>3 - Medium</option>
+              <option value={2}>2 - Low</option>
+              <option value={1}>1 - Info</option>
+            </select>
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Zone</label>
+            <select
+              value={zoneId}
+              onChange={e => setZoneId(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              required
+            >
+              <option value="">Select Zone...</option>
+              <option value="all">All Zones</option>
               {zones && zones.map(z => (
                 <option key={z.id} value={z.id}>{z.name}</option>
-              ))}
-              {teams && teams.map(t => (
-                <option key={t.name} value={t.name}>{t.name} Team</option>
               ))}
             </select>
           </div>
@@ -130,7 +143,7 @@ export default function SendAlertModal({ open, onClose, zones, teams, onSendAler
                 type="button"
                 className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
                 onClick={handleGenerateAI}
-                disabled={generating || !alertType || !target || !language}
+                disabled={generating || !alertType || !zoneId || !language}
               >
                 {generating ? 'Generating...' : 'Generate with AI'}
               </button>
@@ -170,7 +183,7 @@ export default function SendAlertModal({ open, onClose, zones, teams, onSendAler
             <button
               type="submit"
               className="px-4 py-2 rounded bg-orange-600 text-white"
-              disabled={!alertType || !target || !language || !message}
+              disabled={!alertType || !zoneId || !language || !message}
             >
               Send Alert
             </button>

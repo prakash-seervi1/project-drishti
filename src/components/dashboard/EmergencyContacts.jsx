@@ -7,21 +7,19 @@ export default function EmergencyContacts({ emergencyContacts, handleEmergencyCa
         <Phone className="w-6 h-6 mr-2 text-red-500" />
         Emergency Response Contacts
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {emergencyContacts.map((contact) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {emergencyContacts.slice(0, 3).map((contact) => (
           <div key={contact.service} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
-              <div className="font-medium text-gray-900">{contact.service}</div>
+              <div className="font-medium text-gray-900" title={contact.service}>{contact.service}</div>
               <div
                 className={`w-2 h-2 rounded-full ${contact.status === "Available" ? "bg-green-500" : "bg-red-500"}`}
               ></div>
             </div>
-            <div className="text-2xl font-bold text-blue-600 mb-2">
+            <div className="text-2xl font-bold text-blue-600 mb-2" title={typeof contact.number === 'object' && contact.number !== null ? Object.values(contact.number).join(', ') : contact.number} >
               {typeof contact.number === 'object' && contact.number !== null
                 ? Object.entries(contact.number).map(([type, value]) => (
-                    <div key={type} className="text-base text-gray-700">
-                      {type}: {value}
-                    </div>
+                    <span key={type} className="text-base text-gray-700 block" title={`${type}: ${value}`}>{type}: {value}</span>
                   ))
                 : contact.number}
             </div>

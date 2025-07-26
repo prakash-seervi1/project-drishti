@@ -110,7 +110,7 @@ export default function IncidentCard({
 
               <p className="text-gray-700 leading-relaxed mb-4">{incident.description}</p>
 
-              <IncidentQuickStats incident={incident} />
+              <IncidentQuickStats incident={incident} zone={zone} />
               <IncidentTags tags={incident.tags} />
             </div>
           </div>

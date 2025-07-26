@@ -1,8 +1,8 @@
 import { ArrowUp, ArrowDown } from 'lucide-react'
 
 export default function StatCard({ title, value, icon, color, trend }) {
-  const isPositive = trend.startsWith("+")
-  const isNegative = trend.startsWith("-")
+  const isPositive = trend?.startsWith("+")
+  const isNegative = trend?.startsWith("-")
 
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
