@@ -207,3 +207,51 @@ def get_responders_assigned_to_incident(incident_id: str) -> List[Dict]:
     # Fetch responder details
     responders = [dict(id=doc.id, **doc.to_dict()) for doc in db.collection('responders').where('id', 'in', responder_ids).stream()]
     return responders 
+
+# @log_tool_call("get_all_incident_reports")
+def get_all_incident_reports() -> dict:
+    docs = db.collection('incident_reports').stream()
+    incidents = [dict(id=doc.id, **doc.to_dict()) for doc in docs]
+    return {"incidents": incidents}
+
+# @log_tool_call("get_incident_reports_by_venue")
+def get_incident_reports_by_venue(venue_id: str) -> dict:
+    docs = db.collection('incident_reports').where('venue_id', '==', venue_id).stream()
+    incidents = [dict(id=doc.id, **doc.to_dict()) for doc in docs]
+    return {"incidents": incidents}
+
+# @log_tool_call("get_incident_statistics")
+def get_incident_statistics() -> dict:
+    docs = db.collection('incident_reports').stream()
+    incidents = [dict(id=doc.id, **doc.to_dict()) for doc in docs]
+    if not incidents:
+        return {
+            "total_incidents": 0,
+            "resolved_incidents": 0,
+            "resolution_rate": 0.0,
+            "avg_severity": 0.0,
+            "avg_feedback": 0.0,
+            "incident_types": {},
+            "severity_distribution": {}
+        }
+    resolved_incidents = [i for i in incidents if i.get('resolved', False)]
+    resolution_rate = len(resolved_incidents) / len(incidents)
+    avg_severity = sum([i.get('severity', 0) for i in resolved_incidents]) / max(len(resolved_incidents), 1)
+    avg_feedback = sum([i.get('feedback_rating', 4) for i in incidents]) / max(len(incidents), 1)
+    incident_types = {}
+    for incident in incidents:
+        inc_type = incident.get('type', 'unknown')
+        incident_types[inc_type] = incident_types.get(inc_type, 0) + 1
+    severity_distribution = {}
+    for incident in incidents:
+        severity = incident.get('severity', 0)
+        severity_distribution[severity] = severity_distribution.get(severity, 0) + 1
+    return {
+        "total_incidents": len(incidents),
+        "resolved_incidents": len(resolved_incidents),
+        "resolution_rate": resolution_rate,
+        "avg_severity": avg_severity,
+        "avg_feedback": avg_feedback,
+        "incident_types": incident_types,
+        "severity_distribution": severity_distribution
+    } 

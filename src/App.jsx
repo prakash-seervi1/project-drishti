@@ -15,6 +15,7 @@ import WireframesPage from "./pages/WireframesPage";
 import VenueManager from "./pages/VenueManager";
 import MobileMenu from "./components/MobileMenu"
 import Zone from "./pages/Zone";
+import Reports from "./pages/Reports";
 
 
 export default function App() {
@@ -50,6 +51,8 @@ export default function App() {
               Upload</Link>
               <Link to="/Dashboard" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Dashboard</Link>
+              <Link to="/reports" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">
+              Reports</Link>
 
               {/* <Link to="/designSystem" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Design System</Link> */}
@@ -78,6 +81,7 @@ export default function App() {
           <Route path="/incident/:id" element={<IncidentDetail />} />
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Upload" element={<MediaUpload/>} />
+          <Route path="/reports" element={<Reports />} />
           {/* <Route path="/designSystem" element={<DesignSystemPage />} /> */}
           {/* <Route path="/wireframes" element={<WireframesPage />} /> */}
           <Route path="/venue-manager" element={<VenueManager />} />

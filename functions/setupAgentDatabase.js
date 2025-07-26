@@ -296,6 +296,73 @@ async function setupAgentDatabase() {
     location: { lat: 12.9736, lng: 77.5966 }
   });
 
+  // 10. Incident Reports (Each document is a single incident)
+  const incidentSeeds = [
+    {
+      type: 'fire', severity: 5, description: 'Major electrical fire, rapid response required', timestamp: new Date('2023-12-01T10:15:00Z'), resolved: true, response_time: '3 min', venue_id: 'venue_a', zone_id: 'zone_a', confidence_score: 0.92, feedback_rating: 5, responder_feedback: 'Excellent coordination, fire contained quickly'
+    },
+    {
+      type: 'crowd', severity: 3, description: 'Crowd congestion at main entrance', timestamp: new Date('2023-12-01T12:30:00Z'), resolved: true, response_time: '5 min', venue_id: 'venue_a', zone_id: 'zone_a', confidence_score: 0.90, feedback_rating: 4, responder_feedback: 'Crowd dispersed efficiently'
+    },
+    {
+      type: 'medical', severity: 4, description: 'Medical emergency, fainted attendee', timestamp: new Date('2023-12-01T14:00:00Z'), resolved: true, response_time: '2 min', venue_id: 'venue_a', zone_id: 'zone_b', confidence_score: 0.93, feedback_rating: 5, responder_feedback: 'Patient stabilized and transported'
+    },
+    {
+      type: 'security', severity: 2, description: 'Suspicious activity reported', timestamp: new Date('2023-12-01T16:45:00Z'), resolved: true, response_time: '8 min', venue_id: 'venue_a', zone_id: 'zone_b', confidence_score: 0.88, feedback_rating: 3, responder_feedback: 'False alarm, area secured'
+    },
+    {
+      type: 'security', severity: 2, description: 'Unauthorized access detected', timestamp: new Date('2023-12-02T09:45:00Z'), resolved: true, response_time: '4 min', venue_id: 'venue_b', zone_id: 'zone_c', confidence_score: 0.85, feedback_rating: 4, responder_feedback: 'Access point secured, investigation ongoing'
+    },
+    {
+      type: 'environmental', severity: 1, description: 'Minor water leakage reported', timestamp: new Date('2023-12-02T11:20:00Z'), resolved: true, response_time: '15 min', venue_id: 'venue_b', zone_id: 'zone_c', confidence_score: 0.80, feedback_rating: 3, responder_feedback: 'Leak contained, maintenance notified'
+    },
+    {
+      type: 'technical', severity: 3, description: 'Temporary power outage', timestamp: new Date('2023-12-02T13:10:00Z'), resolved: true, response_time: '12 min', venue_id: 'venue_b', zone_id: 'zone_d', confidence_score: 0.87, feedback_rating: 4, responder_feedback: 'Power restored, backup systems activated'
+    },
+    {
+      type: 'panic', severity: 4, description: 'Crowd panic due to false alarm', timestamp: new Date('2023-12-02T15:30:00Z'), resolved: true, response_time: '6 min', venue_id: 'venue_b', zone_id: 'zone_d', confidence_score: 0.89, feedback_rating: 5, responder_feedback: 'Crowd calmed, situation explained'
+    },
+    {
+      type: 'crowd', severity: 3, description: 'Large crowd gathering in parking area', timestamp: new Date('2023-12-03T10:00:00Z'), resolved: true, response_time: '7 min', venue_id: 'venue_c', zone_id: 'zone_e', confidence_score: 0.78, feedback_rating: 3, responder_feedback: 'Crowd managed, traffic flow restored'
+    },
+    {
+      type: 'medical', severity: 5, description: 'Critical medical emergency - cardiac arrest', timestamp: new Date('2023-12-03T12:15:00Z'), resolved: true, response_time: '1 min', venue_id: 'venue_c', zone_id: 'zone_e', confidence_score: 0.95, feedback_rating: 5, responder_feedback: 'CPR initiated, ambulance arrived quickly'
+    },
+    {
+      type: 'fire', severity: 2, description: 'Small electrical fire in equipment room', timestamp: new Date('2023-12-03T14:30:00Z'), resolved: true, response_time: '5 min', venue_id: 'venue_c', zone_id: 'zone_f', confidence_score: 0.82, feedback_rating: 4, responder_feedback: 'Fire extinguished, area ventilated'
+    },
+    {
+      type: 'environmental', severity: 2, description: 'Poor air quality detected', timestamp: new Date('2023-12-03T16:45:00Z'), resolved: true, response_time: '10 min', venue_id: 'venue_c', zone_id: 'zone_f', confidence_score: 0.80, feedback_rating: 2, responder_feedback: 'Ventilation improved, air quality restored'
+    },
+    {
+      type: 'technical', severity: 1, description: 'Communication system malfunction', timestamp: new Date('2023-12-03T18:20:00Z'), resolved: true, response_time: '20 min', venue_id: 'venue_c', zone_id: 'zone_f', confidence_score: 0.77, feedback_rating: 2, responder_feedback: 'System rebooted, communications restored'
+    },
+    {
+      type: 'security', severity: 4, description: 'Security breach - unauthorized person in restricted area', timestamp: new Date('2023-12-04T08:30:00Z'), resolved: true, response_time: '3 min', venue_id: 'venue_d', zone_id: 'zone_g', confidence_score: 0.88, feedback_rating: 5, responder_feedback: 'Intruder apprehended, area secured'
+    },
+    {
+      type: 'medical', severity: 3, description: 'Injury from fall', timestamp: new Date('2023-12-04T11:00:00Z'), resolved: true, response_time: '4 min', venue_id: 'venue_d', zone_id: 'zone_g', confidence_score: 0.85, feedback_rating: 4, responder_feedback: 'First aid provided, medical attention given'
+    },
+    {
+      type: 'crowd', severity: 2, description: 'Minor crowd disturbance', timestamp: new Date('2023-12-04T13:45:00Z'), resolved: true, response_time: '6 min', venue_id: 'venue_d', zone_id: 'zone_g', confidence_score: 0.80, feedback_rating: 3, responder_feedback: 'Situation de-escalated, crowd dispersed'
+    },
+    {
+      type: 'fire', severity: 4, description: 'Kitchen fire in food court', timestamp: new Date('2023-12-05T12:00:00Z'), resolved: true, response_time: '2 min', venue_id: 'venue_e', zone_id: 'zone_h', confidence_score: 0.95, feedback_rating: 5, responder_feedback: 'Fire contained, kitchen evacuated safely'
+    },
+    {
+      type: 'medical', severity: 2, description: 'Minor allergic reaction', timestamp: new Date('2023-12-05T14:30:00Z'), resolved: true, response_time: '3 min', venue_id: 'venue_e', zone_id: 'zone_h', confidence_score: 0.90, feedback_rating: 4, responder_feedback: 'Patient treated, condition stable'
+    },
+    {
+      type: 'technical', severity: 2, description: 'HVAC system malfunction', timestamp: new Date('2023-12-05T16:15:00Z'), resolved: true, response_time: '25 min', venue_id: 'venue_e', zone_id: 'zone_h', confidence_score: 0.92, feedback_rating: 5, responder_feedback: 'System repaired, temperature normalized'
+    }
+  ];
+  for (const incident of incidentSeeds) {
+    await db.collection('incident_reports').add({
+      ...incident,
+      generated_at: admin.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
   console.log('Agent database setup complete!');
 }
 

@@ -1,5 +1,6 @@
 import { Shield, Thermometer, Wind, AlertTriangle, Activity, CheckCircle, UserCheck, Map, Users } from 'lucide-react'
 import StatCard from './StatCard'
+import { Link } from 'react-router-dom';
 
 export default function DashboardHeader({ dashboardData }) {
   return (
@@ -13,6 +14,9 @@ export default function DashboardHeader({ dashboardData }) {
           <p className="text-gray-600 mt-1">Real-time event safety monitoring and response coordination</p>
         </div>
         <div className="flex items-center space-x-3">
+          <Link to="/reports" className="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors shadow">
+            Reports
+          </Link>
           <div className="text-right">
             <div className="text-sm text-gray-500">Weather</div>
             <div className="flex items-center space-x-2">

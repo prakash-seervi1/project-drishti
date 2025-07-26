@@ -69,4 +69,16 @@ def get_incidents_by_zone(zone_id: str):
 
 @router.get("/responders/assigned_to_incident/{incident_id}")
 def get_responders_assigned_to_incident(incident_id: str):
-    return db_tools.get_responders_assigned_to_incident(incident_id) 
+    return db_tools.get_responders_assigned_to_incident(incident_id)
+
+@router.get("/incident_reports")
+def get_all_incident_reports():
+    return db_tools.get_all_incident_reports()
+
+@router.get("/incident_reports/{venue_id}")
+def get_incident_reports_by_venue(venue_id: str):
+    return db_tools.get_incident_reports_by_venue(venue_id)
+
+@router.get("/incident_statistics")
+def get_incident_statistics():
+    return db_tools.get_incident_statistics() 

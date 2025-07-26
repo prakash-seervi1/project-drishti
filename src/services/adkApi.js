@@ -1,5 +1,5 @@
 // API Service for Python/FastAPI ADK Backend
-const BASE_URL = "https://gcp-crowd-agents-268678901849.us-central1.run.app/api";
+const BASE_URL = "https://gcp-crowd-agents-961501630221.us-central1.run.app/api";
 
 export const api = {
   // Incidents
@@ -139,6 +139,12 @@ export const api = {
     const response = await fetch(`${BASE_URL}/responders/assigned_to_incident/${incidentId}`);
     return await response.json();
   },
+
+  // Incident Reports & Statistics
+  getAllIncidentReports: async () => (await fetch(`${BASE_URL}/incident_reports`)).json(),
+  getIncidentStatistics: async () => (await fetch(`${BASE_URL}/incident_statistics`)).json(),
+  getIncidentReportsByVenue: async (venueId) => (await fetch(`${BASE_URL}/incident_reports/${venueId}`)).json(),
+  getVenueById: async (venueId) => (await fetch(`${BASE_URL}/venues/${venueId}`)).json(),
 };
 
 // Agent Orchestrator API
