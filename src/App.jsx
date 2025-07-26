@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Summary from "./pages/Summary";
 import Incidents from "./pages/Incidents";
@@ -22,9 +22,15 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const hideMenu = location.pathname === '/login';
   const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
   const isAdmin = accesscode === 127;
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -46,9 +52,11 @@ export default function App() {
                         Home
                       </Link>
                     )}
-                    <Link to="/incidents" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                      Incidents
-                    </Link>
+                    {isAdmin && (
+                      <Link to="/incidents" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                        Incidents
+                      </Link>
+                    )}
                     {isAdmin && (
                       <>
                         <Link to="/zones" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
@@ -63,12 +71,20 @@ export default function App() {
                         Reports</Link>
                       </>
                     )}
+                    {/* Logout button always visible if logged in */}
+                    <button
+                      onClick={handleLogout}
+                      className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium transition-colors"
+                    >
+                      Logout
+                    </button>
                   </div>
                 </div>
               </div>
             </nav>
             <MobileMenu />
-            <FloatingActionBar />
+            {/* Only show FloatingActionBar for admin */}
+            {isAdmin && <FloatingActionBar />}
           </>
         )}
         <div className="container mx-auto p-6 animate-fade-in"> {/* Main content area */}

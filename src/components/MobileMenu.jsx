@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Menu as MenuIcon, X as CloseIcon } from "lucide-react"
 
 const navLinks = [
@@ -15,11 +15,17 @@ export default function MobileMenu() {
   const [open, setOpen] = useState(false)
   const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
   const isAdmin = accesscode === 127;
+  const navigate = useNavigate();
 
   // Filter nav links based on access level
   const filteredNavLinks = isAdmin 
     ? navLinks 
-    : navLinks.filter(link => link.to === "/Incidents");
+    : [];
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -65,6 +71,15 @@ export default function MobileMenu() {
             </li>
           ))}
         </ul>
+        {/* Logout button always visible if logged in */}
+        <div className="p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium transition-colors"
+          >
+            Logout
+          </button>
+        </div>
       </nav>
     </>
   )
