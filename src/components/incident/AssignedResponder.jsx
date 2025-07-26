@@ -1,6 +1,14 @@
 import { User, Phone, MessageSquare } from "lucide-react"
 
 export default function AssignedResponder({ assignedResponder, assignment, responders, assignResponder, liveData }) {
+  const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
+  const isAdmin = accesscode === 127;
+
+  // Hide the entire component for responders
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
     <div>
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">

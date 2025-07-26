@@ -58,12 +58,7 @@ export default function CrowdForecastChart({ zoneId }) {
             crowdDensity: zoneRes.data?.lastCrowdDensity || 'moderate'
           };
           try {
-            const res = await fetch('https://gcp-crowd-agents-268678901849.us-central1.run.app/api/predict', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            const data = await api.predictCrowd(payload);
             let predictionValue = data.prediction;
             if (Array.isArray(predictionValue)) {
               predictionValue = predictionValue[0];

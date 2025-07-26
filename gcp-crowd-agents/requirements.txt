@@ -16,3 +16,4 @@ SQLAlchemy>=2.0
 PyMySQL>=1.0 
 anthropic
 aiohttp
+PyJWT

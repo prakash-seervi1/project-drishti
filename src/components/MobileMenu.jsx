@@ -13,6 +13,13 @@ const navLinks = [
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
+  const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
+  const isAdmin = accesscode === 127;
+
+  // Filter nav links based on access level
+  const filteredNavLinks = isAdmin 
+    ? navLinks 
+    : navLinks.filter(link => link.to === "/Incidents");
 
   return (
     <>
@@ -46,7 +53,7 @@ export default function MobileMenu() {
           <span className="font-bold text-lg text-gray-800">Menu</span>
         </div>
         <ul className="flex flex-col p-4 space-y-2">
-          {navLinks.map((link) => (
+          {filteredNavLinks.map((link) => (
             <li key={link.to}>
               <Link
                 to={link.to}

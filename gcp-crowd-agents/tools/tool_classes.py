@@ -2,7 +2,8 @@ from google.adk.tools import FunctionTool
 from .db_tools import (
     fetch_incidents, get_active_incidents, fetch_zones, fetch_responders, get_available_responders,
     fetch_alerts, analyze_responder_assignments, assign_responder_to_incident, assign_any_responder_to_incident,
-    assign_responder_to_zone, assign_any_responder_to_zone, notify_unavailable, suggest_zones_needing_responders
+    assign_responder_to_zone, assign_any_responder_to_zone, notify_unavailable, suggest_zones_needing_responders,
+    get_incidents_for_responder, get_incidents_details_for_responder
 )
 import logging
 from typing import Dict, Any, List
@@ -67,3 +68,11 @@ class NotifyUnavailableTool(FunctionTool):
 class SuggestZonesNeedingRespondersTool(FunctionTool):
     def __init__(self):
         super().__init__(func=suggest_zones_needing_responders)
+
+class GetIncidentsForResponderTool(FunctionTool):
+    def __init__(self):
+        super().__init__(func=get_incidents_for_responder)
+
+class GetIncidentsDetailsForResponderTool(FunctionTool):
+    def __init__(self):
+        super().__init__(func=get_incidents_details_for_responder)

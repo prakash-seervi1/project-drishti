@@ -82,3 +82,10 @@ def get_incident_reports_by_venue(venue_id: str):
 @router.get("/incident_statistics")
 def get_incident_statistics():
     return db_tools.get_incident_statistics() 
+@router.get("/incidents_for_responder/{responder_id}")
+def get_incidents_for_responder(responder_id: str):
+    return db_tools.get_incidents_for_responder(responder_id)
+
+@router.get("/incidents_details_for_responder/{responder_id}")
+def get_incidents_details_for_responder(responder_id: str):
+    return db_tools.get_incidents_details_for_responder(responder_id) 

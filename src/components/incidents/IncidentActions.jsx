@@ -2,6 +2,9 @@ import { Eye, Phone, Radio, Zap, Siren } from "lucide-react"
 import { Link } from "react-router-dom"
 
 export default function IncidentActions({ incident }) {
+  const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
+  const isAdmin = accesscode === 127;
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-3">
@@ -27,7 +30,7 @@ export default function IncidentActions({ incident }) {
       </div>
 
       <div className="flex items-center space-x-2">
-        {incident.status !== "resolved" && (
+        {incident.status !== "resolved" && isAdmin && (
           <>
             <button className="flex items-center px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm">
               <Zap className="w-4 h-4 mr-1" />

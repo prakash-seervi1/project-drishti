@@ -22,7 +22,9 @@ from tools.tool_classes import (
     AssignResponderToZoneTool,
     AssignAnyResponderToZoneTool,
     NotifyUnavailableTool,
-    SuggestZonesNeedingRespondersTool
+    SuggestZonesNeedingRespondersTool,
+    GetIncidentsForResponderTool,
+    GetIncidentsDetailsForResponderTool
 )
 
 # Configure logging
@@ -64,7 +66,9 @@ class AgentService:
             AssignResponderToZoneTool(),
             AssignAnyResponderToZoneTool(),
             NotifyUnavailableTool(),
-            SuggestZonesNeedingRespondersTool()
+            SuggestZonesNeedingRespondersTool(),
+            GetIncidentsForResponderTool(),
+            GetIncidentsDetailsForResponderTool()
         ]
         logger.info(f"Registered tool objects: {[tool.__class__.__name__ for tool in tool_objects]}")
 
@@ -91,10 +95,14 @@ class AgentService:
                     "- assign_any_responder_to_zone(zone_id: str): Assign any available responder to a zone.\n"
                     "- notify_unavailable(zone_id: str): Log an alert for unavailable responders in a zone.\n"
                     "- suggest_zones_needing_responders: Suggest zones or incidents that need more responders.\n"
+                    "- get_incidents_for_responder(responder_id: str): Fetch all incidents for a given responder.\n"
+                    "- get_incidents_details_for_responder(responder_id: str): Fetch full incident details for a given responder.\n"
                     "Instructions:\n"
                     "- If the user asks to assign a responder but does not specify which one, use the 'assign_any_responder_to_incident' or 'assign_any_responder_to_zone' tool.\n"
                     "- If the user asks where more responders are needed, use 'suggest_zones_needing_responders'.\n"
                     "- If the user asks for only active incidents or available responders, use 'get_active_incidents' or 'get_available_responders'.\n"
+                    "- If the user asks for incidents assigned to a specific responder, use 'get_incidents_for_responder'.\n"
+                    "- If the user asks for full incident details for a specific responder, use 'get_incidents_details_for_responder'.\n"
                     "- If a tool returns an error, return the 'error_message' as the response.\n"
                     "- If the query is unclear or lacks required arguments, ask the user for clarification.\n"
                     "\n"

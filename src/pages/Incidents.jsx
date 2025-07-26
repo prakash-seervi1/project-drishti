@@ -42,26 +42,53 @@ export default function Incidents() {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    api.getIncidents()
-      .then(data => {
-        // Support both array and {incidents: array} response
-        const rawIncidents = Array.isArray(data) ? data : (data.incidents || []);
-        const mappedIncidents = rawIncidents.map(incident => ({
-          ...incident,
-          // Convert timestamp to Firestore-style object for compatibility
-          timestamp: incident.timestamp
-            ? { _seconds: Math.floor(new Date(incident.timestamp).getTime() / 1000) }
-            : { _seconds: Math.floor(Date.now() / 1000) },
-          // Use zoneId for mapping, but keep zone as undefined (zoneMap will fill it in)
-          zone: undefined,
-        }));
-        setIncidents(mappedIncidents);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message)
-        setLoading(false)
-      })
+    
+    const accesscode = parseInt(localStorage.getItem('accesscode') || '0');
+    const userid = localStorage.getItem('userid');
+    
+    // If responder (accesscode < 127), fetch only their incidents
+    if (accesscode < 127 && userid) {
+      // Use the new API endpoint for responder incidents with full details
+      api.getIncidentsDetailsForResponder(userid)
+        .then(data => {
+          const rawIncidents = Array.isArray(data) ? data : (data.incidents || []);
+          const mappedIncidents = rawIncidents.map(incident => ({
+            ...incident,
+            timestamp: incident.timestamp
+              ? { _seconds: Math.floor(new Date(incident.timestamp).getTime() / 1000) }
+              : { _seconds: Math.floor(Date.now() / 1000) },
+            zone: undefined,
+          }));
+          setIncidents(mappedIncidents);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError(err.message)
+          setLoading(false)
+        })
+    } else {
+      // Admin (accesscode 127) gets all incidents using existing logic
+      api.getIncidents()
+        .then(data => {
+          // Support both array and {incidents: array} response
+          const rawIncidents = Array.isArray(data) ? data : (data.incidents || []);
+          const mappedIncidents = rawIncidents.map(incident => ({
+            ...incident,
+            // Convert timestamp to Firestore-style object for compatibility
+            timestamp: incident.timestamp
+              ? { _seconds: Math.floor(new Date(incident.timestamp).getTime() / 1000) }
+              : { _seconds: Math.floor(Date.now() / 1000) },
+            // Use zoneId for mapping, but keep zone as undefined (zoneMap will fill it in)
+            zone: undefined,
+          }));
+          setIncidents(mappedIncidents);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError(err.message)
+          setLoading(false)
+        })
+    }
   }, [])
 
   // Filter incidents based on search term

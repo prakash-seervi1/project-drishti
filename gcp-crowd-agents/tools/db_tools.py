@@ -255,3 +255,39 @@ def get_incident_statistics() -> dict:
         "incident_types": incident_types,
         "severity_distribution": severity_distribution
     } 
+@log_tool_call("get_incidents_for_responder")
+def get_incidents_for_responder(responder_id: str) -> list:
+    """Fetch all incidents for a given responder based on responder_status_updates."""
+    # Find all status events for this responder with an incidentId
+    status_events = list(db.collection('responder_status_updates')
+        .where('responderId', '==', responder_id)
+        .stream())
+    incident_ids = [e.to_dict().get('incidentId') for e in status_events if e.to_dict().get('incidentId')]
+    if not incident_ids:
+        return []
+    # Remove duplicates
+    incident_ids = list(set(incident_ids))
+    # Fetch incident details
+    incidents = [dict(id=doc.id, **doc.to_dict()) for doc in db.collection('incidents').where('id', 'in', incident_ids).stream()]
+    return incidents 
+
+@log_tool_call("get_incidents_details_for_responder")
+def get_incidents_details_for_responder(responder_id: str) -> list:
+    """Fetch full incident details for a given responder from incidents collection."""
+    # Find all status events for this responder with an incidentId
+    status_events = list(db.collection('responder_status_updates')
+        .where('responderId', '==', responder_id)
+        .stream())
+    incident_ids = [e.to_dict().get('incidentId') for e in status_events if e.to_dict().get('incidentId')]
+    if not incident_ids:
+        return []
+    # Remove duplicates
+    incident_ids = list(set(incident_ids))
+    # Fetch full incident details from incidents collection
+    incidents = []
+    for incident_id in incident_ids:
+        doc = db.collection('incidents').document(incident_id).get()
+        if doc.exists:
+            incident_data = dict(id=doc.id, **doc.to_dict())
+            incidents.append(incident_data)
+    return incidents 
