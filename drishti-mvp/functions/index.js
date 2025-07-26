@@ -21,11 +21,6 @@ const vertexAI = new VertexAI({
 });
 
 
-// const API_KEY = "AIzaSyD5oz79lGHEmVIdrTxiqODNJPdX63Xubos"; // Ensure this env var is set in Cloud Functions
-// const genAI = new GoogleGenerativeAI(API_KEY);
-// const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-pro" }); // <<< Change to gemini-1.5-flash
-// // ^^^^ END CHANGE ^^^^
-
 
 const geminiModel = vertexAI.getGenerativeModel({
   model: "gemini-2.5-pro",
